@@ -85,37 +85,8 @@ public class AccountController : Controller
         return View(model);
     }
 
-    [AllowAnonymous]
-    public IActionResult Register()
-    {
-        if (User.Identity?.IsAuthenticated == true)
-            return RedirectToAction("Index", "Dashboard");
-        return View();
-    }
-
-    [HttpPost]
-    [AllowAnonymous]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Register(RegisterDto model)
-    {
-        if (!ModelState.IsValid)
-            return View(model);
-
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-        var result = await _userService.RegisterAsync(model, ipAddress);
-
-        if (result.Success && result.User != null)
-        {
-            var user = await _userManager.FindByNameAsync(result.User.Username!);
-            if (user != null)
-                await _signInManager.SignInAsync(user, isPersistent: false);
-
-            return RedirectToAction("Index", "Dashboard");
-        }
-
-        ModelState.AddModelError("", result.Message);
-        return View(model);
-    }
+    // Registration is now handled by CEO/Managers only via CEO/CreateEmployee
+    // Public registration is disabled
 
     public async Task<IActionResult> Logout()
     {

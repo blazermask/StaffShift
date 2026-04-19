@@ -59,7 +59,7 @@ public class TimeOffService : ITimeOffService
         return requestDtos;
     }
 
-    public async Task<(bool Success, string Message, TimeOffRequestDto? Request)> CreateRequestAsync(CreateTimeOffRequestDto model, int userId)
+    public async Task<(bool Success, string Message, TimeOffRequestDto? Request)> CreateRequestAsync(CreateTimeOffRequestDto model, int userId, bool isCEO = false)
     {
         var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
@@ -88,6 +88,11 @@ public class TimeOffService : ITimeOffService
             return (false, "You already have a time off request for this period.", null);
         }
 
+        // CEO requests are auto-approved
+        var status = isCEO ? "Approved" : "Pending";
+        var reviewedBy = isCEO ? userId : (int?)null;
+        var reviewedAt = isCEO ? DateTime.UtcNow : (DateTime?)null;
+
         var request = new Core.Entities.TimeOffRequest
         {
             UserId = userId,
@@ -96,7 +101,9 @@ public class TimeOffService : ITimeOffService
             RequestType = model.RequestType,
             Reason = model.Reason,
             IsPaid = model.RequestType == "Vacation" ? model.IsPaid : true,
-            Status = "Pending",
+            Status = status,
+            ReviewedBy = reviewedBy,
+            ReviewedAt = reviewedAt,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -104,7 +111,8 @@ public class TimeOffService : ITimeOffService
         await _timeOffRepository.SaveChangesAsync();
 
         var requestDto = await MapToTimeOffRequestDto(request, userId);
-        return (true, "Time off request submitted successfully!", requestDto);
+        var message = isCEO ? "Time off request auto-approved!" : "Time off request submitted successfully!";
+        return (true, message, requestDto);
     }
 
     public async Task<(bool Success, string Message, TimeOffRequestDto? Request)> ReviewRequestAsync(ReviewTimeOffRequestDto model, int reviewerId)

@@ -41,7 +41,7 @@ public class DashboardController : Controller
         ViewBag.UpcomingShifts = upcomingShifts.Take(5);
 
         var timeOffRequests = await _timeOffService.GetRequestsByUserAsync(userId, userId);
-        ViewBag.PendingRequests = timeOffRequests.Where(r => r.Status == "Pending");
+        ViewBag.PendingRequests = timeOffRequests.Count(r => r.Status == "Pending");
 
         var isCEO = User.IsInRole("CEO");
         var isManager = User.IsInRole("Manager");

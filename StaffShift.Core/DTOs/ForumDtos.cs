@@ -11,7 +11,8 @@ public class ForumPostDto
     public int UserId { get; set; }
     public int AuthorId => UserId;
     public string? UserName { get; set; }
-    public string? AuthorName => UserName;
+    public string? UserDisplayName { get; set; }
+    public string? AuthorName => UserDisplayName ?? UserName;
     public string? UserDepartment { get; set; }
     public string? Department => TargetDepartment ?? UserDepartment;
     public string Title { get; set; } = string.Empty;
@@ -80,7 +81,8 @@ public class ForumCommentDto
     public int ForumPostId { get; set; }
     public int UserId { get; set; }
     public string? UserName { get; set; }
-    public string? AuthorName => UserName;
+    public string? UserDisplayName { get; set; }
+    public string? AuthorName => UserDisplayName ?? UserName;
     public string Content { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }

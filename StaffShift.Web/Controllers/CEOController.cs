@@ -263,6 +263,123 @@ public class CEOController : Controller
         return View(model);
     }
 
+    // GET: CEO/Calendar
+    public async Task<IActionResult> Calendar()
+    {
+        var currentUserId = GetCurrentUserId();
+        var users = await _userService.GetAllUsersAsync();
+        
+        // Get all shifts for all users
+        var allShifts = new List<ShiftDto>();
+        foreach (var user in users)
+        {
+            var shifts = await _shiftService.GetShiftsByUserAsync(user.Id, currentUserId);
+            allShifts.AddRange(shifts);
+        }
+        
+        return View(allShifts);
+    }
+
+    // GET: CEO/AssignShifts
+    public async Task<IActionResult> AssignShifts()
+    {
+        var users = await _userService.GetAllUsersAsync();
+        var managers = users.Where(u => u.Roles.Contains("Manager")).ToList();
+        
+        ViewBag.Managers = managers;
+        return View();
+    }
+
+    // POST: CEO/AssignShift
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AssignShift(CreateShiftDto model)
+    {
+        if (!ModelState.IsValid)
+        {
+            var users = await _userService.GetAllUsersAsync();
+            ViewBag.Managers = users.Where(u => u.Roles.Contains("Manager"));
+            return View("AssignShifts", model);
+        }
+
+        var currentUserId = GetCurrentUserId();
+        var result = await _shiftService.CreateShiftAsync(model, currentUserId);
+
+        if (result.Success)
+        {
+            TempData["Success"] = "Shift assigned successfully!";
+            return RedirectToAction(nameof(AssignShifts));
+        }
+
+        ModelState.AddModelError("", result.Message);
+        var allUsers = await _userService.GetAllUsersAsync();
+        ViewBag.Managers = allUsers.Where(u => u.Roles.Contains("Manager"));
+        return View("AssignShifts", model);
+    }
+
+    // GET: CEO/EditShift/5
+    public async Task<IActionResult> EditShift(int id)
+    {
+        var shift = await _shiftService.GetShiftByIdAsync(id, GetCurrentUserId());
+        if (shift == null)
+        {
+            return NotFound();
+        }
+
+        var model = new UpdateShiftDto
+        {
+            Id = shift.Id,
+            ShiftDate = shift.ShiftDate,
+            StartTime = shift.StartTime,
+            EndTime = shift.EndTime,
+            Notes = shift.Notes
+        };
+
+        return View(model);
+    }
+
+    // POST: CEO/EditShift/5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditShift(UpdateShiftDto model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var currentUserId = GetCurrentUserId();
+        var result = await _shiftService.UpdateShiftAsync(model, currentUserId);
+
+        if (result.Success)
+        {
+            TempData["Success"] = "Shift updated successfully!";
+            return RedirectToAction(nameof(Calendar));
+        }
+
+        ModelState.AddModelError("", result.Message);
+        return View(model);
+    }
+
+    // POST: CEO/DeleteShift/5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteShift(int id)
+    {
+        var result = await _shiftService.DeleteShiftAsync(id);
+
+        if (result.Success)
+        {
+            TempData["Success"] = "Shift deleted successfully!";
+        }
+        else
+        {
+            TempData["Error"] = result.Message;
+        }
+
+        return RedirectToAction(nameof(Calendar));
+    }
+
     private int GetCurrentUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

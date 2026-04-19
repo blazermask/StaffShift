@@ -76,7 +76,8 @@ public class TimeOffController : Controller
         }
 
         var userId = GetCurrentUserId();
-        var result = await _timeOffService.CreateRequestAsync(model, userId);
+        var isCEO = User.IsInRole("CEO");
+        var result = await _timeOffService.CreateRequestAsync(model, userId, isCEO);
 
         if (result.Success)
         {

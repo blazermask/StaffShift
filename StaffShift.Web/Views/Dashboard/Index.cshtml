@@ -44,54 +44,117 @@
 
 <div class="row">
     <div class="col-lg-8 mb-4">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="bi bi-clock me-2"></i>Upcoming Shifts</h5>
-                <a asp-controller="Shift" asp-action="Index" class="btn btn-sm btn-outline-primary">View All</a>
+        @if (isCEO)
+        {
+            <!-- CEO: Company Calendar -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-calendar3 me-2"></i>Company Shift Calendar</h5>
+                    <a asp-controller="CEO" asp-action="Calendar" class="btn btn-sm btn-outline-primary">Full Calendar</a>
+                </div>
+                <div class="card-body">
+                    <div id="ceoCalendar" style="height: 400px;"></div>
+                </div>
             </div>
-            <div class="card-body p-0">
-                @if (ViewBag.UpcomingShifts != null && ((IEnumerable<dynamic>)ViewBag.UpcomingShifts).Any())
-                {
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Start Time</th>
-                                    <th>End Time</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var shift in ViewBag.UpcomingShifts)
-                                {
+        }
+        else if (isManager)
+        {
+            <!-- Manager: Team Shifts -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-people me-2"></i>Team Shifts Today</h5>
+                    <a asp-controller="Manager" asp-action="TeamShifts" class="btn btn-sm btn-outline-primary">Manage Shifts</a>
+                </div>
+                <div class="card-body p-0">
+                    @if (ViewBag.TeamShifts != null && ((IEnumerable<dynamic>)ViewBag.TeamShifts).Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
                                     <tr>
-                                        <td>@shift.ShiftDate.ToString("MMM dd, yyyy")</td>
-                                        <td>@shift.StartTime</td>
-                                        <td>@shift.EndTime</td>
-                                        <td><span class="badge badge-@shift.Status.ToLower()">@shift.Status</span></td>
-                                        <td>
-                                            <a asp-controller="Shift" asp-action="Details" asp-route-id="@shift.Id" class="btn btn-sm btn-outline-primary">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                        </td>
+                                        <th>Employee</th>
+                                        <th>Start</th>
+                                        <th>End</th>
+                                        <th>Status</th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-                else
-                {
-                    <div class="empty-state">
-                        <i class="bi bi-calendar-x"></i>
-                        <h5>No Upcoming Shifts</h5>
-                        <p>You don't have any scheduled shifts.</p>
-                    </div>
-                }
+                                </thead>
+                                <tbody>
+                                    @foreach (var shift in ViewBag.TeamShifts)
+                                    {
+                                        <tr>
+                                            <td>@shift.UserName</td>
+                                            <td>@shift.StartTime</td>
+                                            <td>@shift.EndTime</td>
+                                            <td><span class="badge bg-@(shift.Status == "Completed" ? "success" : shift.Status == "In Progress" ? "warning" : "secondary")">@shift.Status</span></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-calendar-x"></i>
+                            <h5>No Team Shifts Today</h5>
+                            <p>Your team has no scheduled shifts for today.</p>
+                        </div>
+                    }
+                </div>
             </div>
-        </div>
+        }
+        else
+        {
+            <!-- Worker: Upcoming Shifts -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-clock me-2"></i>My Upcoming Shifts</h5>
+                    <a asp-controller="Shift" asp-action="Index" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    @if (ViewBag.UpcomingShifts != null && ((IEnumerable<dynamic>)ViewBag.UpcomingShifts).Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Start</th>
+                                        <th>End</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var shift in ViewBag.UpcomingShifts)
+                                    {
+                                        <tr>
+                                            <td>@shift.ShiftDate.ToString("MMM dd, yyyy")</td>
+                                            <td>@shift.StartTime</td>
+                                            <td>@shift.EndTime</td>
+                                            <td><span class="badge bg-secondary">@shift.Status</span></td>
+                                            <td>
+                                                <a asp-controller="Shift" asp-action="Details" asp-route-id="@shift.Id" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-calendar-x"></i>
+                            <h5>No Upcoming Shifts</h5>
+                            <p>You don't have any scheduled shifts.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
     </div>
 
     <div class="col-lg-4 mb-4">
@@ -101,20 +164,53 @@
             </div>
             <div class="card-body">
                 <div class="d-grid gap-2">
-                    <a asp-controller="Shift" asp-action="Create" class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-2"></i>Request Shift
-                    </a>
-                    <a asp-controller="TimeOff" asp-action="Create" class="btn btn-outline-primary">
-                        <i class="bi bi-calendar-x me-2"></i>Request Time Off
-                    </a>
-                    <a asp-controller="Forum" asp-action="Create" class="btn btn-outline-primary">
-                        <i class="bi bi-chat-square-text me-2"></i>New Forum Post
-                    </a>
+                    @if (isCEO)
+                    {
+                        <a asp-controller="CEO" asp-action="Employees" class="btn btn-primary">
+                            <i class="bi bi-people me-2"></i>Manage Employees
+                        </a>
+                        <a asp-controller="CEO" asp-action="AssignShifts" class="btn btn-outline-primary">
+                            <i class="bi bi-calendar-plus me-2"></i>Assign Manager Shifts
+                        </a>
+                        <a asp-controller="Manager" asp-action="TimeOffRequests" class="btn btn-outline-primary">
+                            <i class="bi bi-calendar-check me-2"></i>Review Time Off Requests
+                        </a>
+                        <a asp-controller="Forum" asp-action="Create" class="btn btn-outline-secondary">
+                            <i class="bi bi-chat-square-text me-2"></i>New Forum Post
+                        </a>
+                    }
+                    else if (isManager)
+                    {
+                        <a asp-controller="Manager" asp-action="Team" class="btn btn-primary">
+                            <i class="bi bi-people me-2"></i>View My Team
+                        </a>
+                        <a asp-controller="Manager" asp-action="AssignShifts" class="btn btn-outline-primary">
+                            <i class="bi bi-calendar-plus me-2"></i>Assign Worker Shifts
+                        </a>
+                        <a asp-controller="Manager" asp-action="TimeOffRequests" class="btn btn-outline-primary">
+                            <i class="bi bi-calendar-check me-2"></i>Review Time Off Requests
+                        </a>
+                        <a asp-controller="TimeOff" asp-action="Create" class="btn btn-outline-secondary">
+                            <i class="bi bi-calendar-x me-2"></i>Request Time Off
+                        </a>
+                        <a asp-controller="Forum" asp-action="Create" class="btn btn-outline-secondary">
+                            <i class="bi bi-chat-square-text me-2"></i>New Forum Post
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="TimeOff" asp-action="Create" class="btn btn-primary">
+                            <i class="bi bi-calendar-x me-2"></i>Request Time Off
+                        </a>
+                        <a asp-controller="Forum" asp-action="Create" class="btn btn-outline-primary">
+                            <i class="bi bi-chat-square-text me-2"></i>New Forum Post
+                        </a>
+                    }
                 </div>
             </div>
         </div>
 
-        @if (ViewBag.TimeOffSummary != null)
+        @if (!isCEO && ViewBag.TimeOffSummary != null)
         {
             <div class="card mt-3">
                 <div class="card-header">
@@ -123,28 +219,11 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
                         <span>Vacation Days Used:</span>
-                        <strong>@ViewBag.TimeOffSummary.VacationDaysUsed / @ViewBag.TimeOffSummary.VacationDaysTotal</strong>
+                        <strong>@ViewBag.TimeOffSummary.VacationDaysUsed</strong>
                     </div>
-                    <div class="progress mb-3" style="height: 8px;">
-                        @{
-                            var vacationPercent = ViewBag.TimeOffSummary.VacationDaysTotal > 0 
-                                ? (int)((double)ViewBag.TimeOffSummary.VacationDaysUsed / ViewBag.TimeOffSummary.VacationDaysTotal * 100) 
-                                : 0;
-                        }
-                        <div class="progress-bar bg-success" role="progressbar" style="width: @vacationPercent%"></div>
-                    </div>
-                    
                     <div class="d-flex justify-content-between mb-2">
                         <span>Sick Days Used:</span>
-                        <strong>@ViewBag.TimeOffSummary.SickDaysUsed / @ViewBag.TimeOffSummary.SickDaysTotal</strong>
-                    </div>
-                    <div class="progress" style="height: 8px;">
-                        @{
-                            var sickPercent = ViewBag.TimeOffSummary.SickDaysTotal > 0 
-                                ? (int)((double)ViewBag.TimeOffSummary.SickDaysUsed / ViewBag.TimeOffSummary.SickDaysTotal * 100) 
-                                : 0;
-                        }
-                        <div class="progress-bar bg-warning" role="progressbar" style="width: @sickPercent%"></div>
+                        <strong>@ViewBag.TimeOffSummary.SickDaysUsed</strong>
                     </div>
                 </div>
             </div>

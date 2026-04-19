@@ -173,6 +173,62 @@ public class ManagerController : Controller
         return View(requests);
     }
 
+    // GET: Manager/AssignShifts
+    public async Task<IActionResult> AssignShifts()
+    {
+        var userId = GetCurrentUserId();
+        var team = await _userService.GetSubordinatesAsync(userId);
+        
+        ViewBag.Team = team;
+        return View();
+    }
+
+    // POST: Manager/AssignShift
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AssignShift(CreateShiftDto model)
+    {
+        if (!ModelState.IsValid)
+        {
+            var userId = GetCurrentUserId();
+            var team = await _userService.GetSubordinatesAsync(userId);
+            ViewBag.Team = team;
+            return View("AssignShifts", model);
+        }
+
+        var result = await _shiftService.CreateShiftAsync(model, GetCurrentUserId());
+
+        if (result.Success)
+        {
+            TempData["Success"] = "Shift assigned successfully!";
+            return RedirectToAction(nameof(AssignShifts));
+        }
+
+        ModelState.AddModelError("", result.Message);
+        ViewBag.Team = await _userService.GetSubordinatesAsync(GetCurrentUserId());
+        return View("AssignShifts", model);
+    }
+
+    // GET: Manager/TeamShifts
+    public async Task<IActionResult> TeamShifts(DateTime? date)
+    {
+        var userId = GetCurrentUserId();
+        var shiftDate = date ?? DateTime.Today;
+        ViewBag.SelectedDate = shiftDate;
+
+        var team = await _userService.GetSubordinatesAsync(userId);
+        var teamIds = team.Select(t => t.Id).ToList();
+        var allShifts = new List<ShiftDto>();
+
+        foreach (var teamId in teamIds)
+        {
+            var userShifts = await _shiftService.GetShiftsByUserAsync(teamId, userId);
+            allShifts.AddRange(userShifts.Where(s => s.ShiftDate.Date == shiftDate.Date));
+        }
+
+        return View(allShifts);
+    }
+
     private int GetCurrentUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

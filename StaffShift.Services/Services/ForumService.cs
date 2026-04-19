@@ -249,12 +249,16 @@ public class ForumService : IForumService
     private async Task<ForumPostDto> MapToForumPostDto(ForumPost post, int? currentUserId)
     {
         var user = await _userRepository.GetByIdAsync(post.UserId);
+        var displayName = !string.IsNullOrEmpty(user?.FirstName) 
+            ? $"{user.FirstName} {user.LastName}".Trim() 
+            : user?.UserName;
 
         return new ForumPostDto
         {
             Id = post.Id,
             UserId = post.UserId,
             UserName = user?.UserName,
+            UserDisplayName = displayName,
             UserDepartment = user?.Department,
             Title = post.Title,
             Content = post.Content,
@@ -272,6 +276,9 @@ public class ForumService : IForumService
     private async Task<ForumCommentDto> MapToForumCommentDto(ForumComment comment, int? currentUserId)
     {
         var user = await _userRepository.GetByIdAsync(comment.UserId);
+        var displayName = !string.IsNullOrEmpty(user?.FirstName) 
+            ? $"{user.FirstName} {user.LastName}".Trim() 
+            : user?.UserName;
 
         return new ForumCommentDto
         {
@@ -279,6 +286,7 @@ public class ForumService : IForumService
             ForumPostId = comment.ForumPostId,
             UserId = comment.UserId,
             UserName = user?.UserName,
+            UserDisplayName = displayName,
             Content = comment.Content,
             CreatedAt = comment.CreatedAt,
             UpdatedAt = comment.UpdatedAt,

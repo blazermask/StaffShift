@@ -43,21 +43,35 @@
                                     <i class="bi bi-speedometer2 me-2"></i>Dashboard
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Dashboard" asp-action="Calendar">
-                                    <i class="bi bi-calendar3 me-2"></i>Calendar
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Shift" asp-action="Index">
-                                    <i class="bi bi-calendar-week me-2"></i>My Shifts
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="TimeOff" asp-action="Index">
-                                    <i class="bi bi-calendar-x me-2"></i>Time Off
-                                </a>
-                            </li>
+                            @if (!User.IsInRole("CEO"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Dashboard" asp-action="Calendar">
+                                        <i class="bi bi-calendar3 me-2"></i>My Calendar
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Shift" asp-action="Index">
+                                        <i class="bi bi-calendar-week me-2"></i>My Shifts
+                                    </a>
+                                </li>
+                            }
+                            @if (User.IsInRole("CEO"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="CEO" asp-action="Calendar">
+                                        <i class="bi bi-calendar3 me-2"></i>Company Calendar
+                                    </a>
+                                </li>
+                            }
+                            @if (!User.IsInRole("CEO"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="TimeOff" asp-action="Index">
+                                        <i class="bi bi-calendar-x me-2"></i>Time Off
+                                    </a>
+                                </li>
+                            }
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Forum" asp-action="Index">
                                     <i class="bi bi-chat-square-text me-2"></i>Forum
@@ -65,15 +79,20 @@
                             </li>
                         </ul>
 
-                        @if (User.IsInRole("Manager") || User.IsInRole("CEO"))
+                        @if (User.IsInRole("Manager"))
                         {
                             <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
-                                <span>Management</span>
+                                <span>Team Management</span>
                             </h6>
                             <ul class="nav flex-column mb-2">
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="Manager" asp-action="Team">
                                         <i class="bi bi-people me-2"></i>My Team
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Manager" asp-action="AssignShifts">
+                                        <i class="bi bi-calendar-plus me-2"></i>Assign Shifts
                                     </a>
                                 </li>
                                 <li class="nav-item">
@@ -87,7 +106,7 @@
                         @if (User.IsInRole("CEO"))
                         {
                             <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
-                                <span>Administration</span>
+                                <span>Company Management</span>
                             </h6>
                             <ul class="nav flex-column mb-2">
                                 <li class="nav-item">
@@ -98,6 +117,16 @@
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="CEO" asp-action="Employees">
                                         <i class="bi bi-person-badge me-2"></i>Employees
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="CEO" asp-action="AssignShifts">
+                                        <i class="bi bi-calendar-plus me-2"></i>Assign Manager Shifts
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Manager" asp-action="TimeOffRequests">
+                                        <i class="bi bi-calendar-check me-2"></i>Time Off Requests
                                     </a>
                                 </li>
                                 <li class="nav-item">

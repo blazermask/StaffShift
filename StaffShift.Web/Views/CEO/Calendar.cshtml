@@ -1,0 +1,55 @@
+@model IEnumerable<StaffShift.Core.DTOs.ShiftDto>
+@{
+    ViewData["Title"] = "Company Calendar";
+}
+
+<div class="page-header">
+    <h1><i class="bi bi-calendar3 me-2"></i>Company Shift Calendar</h1>
+    <p class="text-muted mb-0">View and manage all employee shifts</p>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <div id="calendar"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var events = [
+                @foreach (var shift in Model)
+                {
+                    <text>
+                    {
+                        title: '@shift.UserName - @shift.StartTime.ToString(@"hh\:mm") to @shift.EndTime.ToString(@"hh\:mm")',
+                        start: '@shift.ShiftDate.ToString("yyyy-MM-dd")',
+                        backgroundColor: '@(shift.Status == "Completed" ? "#28a745" : shift.Status == "In Progress" ? "#ffc107" : "#0d6efd")',
+                        url: '/CEO/EditShift/@shift.Id'
+                    },
+                    </text>
+                }
+            ];
+            
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek'
+                },
+                events: events,
+                eventClick: function(info) {
+                    info.jsEvent.preventDefault();
+                    if (info.event.url) {
+                        window.location.href = info.event.url;
+                    }
+                }
+            });
+            calendar.render();
+        });
+    </script>
+}

@@ -64,41 +64,17 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-1">
                         <span>Vacation Days</span>
-                        <span>@Model.TimeOffSummary.VacationDaysUsed / @Model.TimeOffSummary.VacationDaysTotal</span>
-                    </div>
-                    <div class="progress mb-3" style="height: 6px;">
-                        @{
-                            var vacationPercent = Model.TimeOffSummary.VacationDaysTotal > 0 
-                                ? (int)((double)Model.TimeOffSummary.VacationDaysUsed / Model.TimeOffSummary.VacationDaysTotal * 100) 
-                                : 0;
-                        }
-                        <div class="progress-bar bg-success" style="width: @vacationPercent%"></div>
+                        <span>@Model.TimeOffSummary.VacationDaysUsed</span>
                     </div>
                     
                     <div class="d-flex justify-content-between mb-1">
                         <span>Sick Days</span>
-                        <span>@Model.TimeOffSummary.SickDaysUsed / @Model.TimeOffSummary.SickDaysTotal</span>
-                    </div>
-                    <div class="progress mb-3" style="height: 6px;">
-                        @{
-                            var sickPercent = Model.TimeOffSummary.SickDaysTotal > 0 
-                                ? (int)((double)Model.TimeOffSummary.SickDaysUsed / Model.TimeOffSummary.SickDaysTotal * 100) 
-                                : 0;
-                        }
-                        <div class="progress-bar bg-warning" style="width: @sickPercent%"></div>
+                        <span>@Model.TimeOffSummary.SickDaysUsed</span>
                     </div>
 
                     <div class="d-flex justify-content-between mb-1">
                         <span>Personal Days</span>
-                        <span>@Model.TimeOffSummary.PersonalDaysUsed / @Model.TimeOffSummary.PersonalDaysTotal</span>
-                    </div>
-                    <div class="progress" style="height: 6px;">
-                        @{
-                            var personalPercent = Model.TimeOffSummary.PersonalDaysTotal > 0 
-                                ? (int)((double)Model.TimeOffSummary.PersonalDaysUsed / Model.TimeOffSummary.PersonalDaysTotal * 100) 
-                                : 0;
-                        }
-                        <div class="progress-bar bg-info" style="width: @personalPercent%"></div>
+                        <span>@Model.TimeOffSummary.PersonalDaysUsed</span>
                     </div>
                 </div>
             </div>
