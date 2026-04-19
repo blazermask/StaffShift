@@ -105,7 +105,7 @@ The system creates default accounts during initialization:
 
 | Role    | Email      | Password     |
 |---------|------------|--------------|
-| CEO     | ceo@company.com    | CEO123!      |
+| CEO     | ceo@company.com    | Ceo123!!      |
 | Manager | manager@company.com | Manager123!  |
 | Worker  | worker@company.com | Worker123!   |
 
