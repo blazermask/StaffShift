@@ -42,10 +42,15 @@ public static class DataInitializer
                 EmailConfirmed = true
             };
 
-            var result = await userManager.CreateAsync(ceoUser, "CEO123!");
+            var result = await userManager.CreateAsync(ceoUser, "Ceo123!!");
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(ceoUser, "CEO");
+            }
+            else
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                Console.WriteLine($"Failed to create CEO user: {errors}");
             }
         }
 

@@ -79,6 +79,12 @@ public class ShiftService : IShiftService
             return (false, "User not found.", null);
         }
 
+        // Validate time range
+        if (model.EndTime <= model.StartTime)
+        {
+            return (false, "End time must be after start time.", null);
+        }
+
         // Check if shift already exists for this user on this date
         var existingShift = await _shiftRepository.GetShiftByUserAndDateAsync(model.UserId, model.ShiftDate);
         if (existingShift != null)

@@ -26,15 +26,15 @@
                         <span asp-validation-for="RequestType" class="text-danger"></span>
                     </div>
 
-                    <!-- Paid/Unpaid Sick Day - only shows for Sick Leave -->
-                    <div class="mb-3" id="sickPaySection" style="display:none">
-                        <label class="form-label fw-semibold">Sick Day Type</label>
+                    <!-- Paid/Unpaid Vacation - only shows for Vacation -->
+                    <div class="mb-3" id="vacationPaySection" style="display:none">
+                        <label class="form-label fw-semibold">Vacation Type</label>
                         <div class="d-flex gap-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="IsPaid" id="isPaidTrue" value="true" checked />
                                 <label class="form-check-label" for="isPaidTrue">
                                     <span class="badge bg-success me-1">Paid</span>
-                                    <small class="text-muted">Uses paid sick day allowance</small>
+                                    <small class="text-muted">Uses paid vacation allowance</small>
                                 </label>
                             </div>
                             <div class="form-check">
@@ -45,7 +45,16 @@
                                 </label>
                             </div>
                         </div>
-                        <div id="paidSickRemaining" class="mt-2"></div>
+                        <div id="paidVacationRemaining" class="mt-2"></div>
+                    </div>
+
+                    <!-- Sick Leave Info - always paid -->
+                    <div class="mb-3" id="sickInfoSection" style="display:none">
+                        <div class="alert alert-info py-2 px-3 mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            <strong>Sick Leave is always paid.</strong>
+                            <span id="sickDaysRemainingText"></span>
+                        </div>
                     </div>
 
                     <div class="row">
@@ -95,10 +104,10 @@
             <div class="card-body">
                 <h5 class="card-title"><i class="bi bi-info-circle me-2 text-primary"></i>Request Guidelines</h5>
                 <ul class="mb-0 small">
-                    <li class="mb-1"><strong>🏖️ Vacation:</strong> Submit at least 2 weeks in advance.</li>
-                    <li class="mb-1"><strong>🏥 Sick (Paid):</strong> Uses your annual paid sick day allowance (10 days/year).</li>
-                    <li class="mb-1"><strong>🤒 Sick (Unpaid):</strong> No pay deduction from allowance; manager approval required.</li>
-                    <li class="mb-1"><strong>👤 Personal:</strong> Provide at least 48 hours notice.</li>
+                    <li class="mb-1"><strong>🏖️ Vacation (Paid):</strong> Uses your annual paid vacation allowance (20 days/year).</li>
+                    <li class="mb-1"><strong>🏖️ Vacation (Unpaid):</strong> No pay deduction from allowance; manager approval required.</li>
+                    <li class="mb-1"><strong>🏥 Sick Leave:</strong> Always paid (10 days/year allowance).</li>
+                    <li class="mb-1"><strong>👤 Personal:</strong> Provide at least 48 hours notice (5 days/year).</li>
                     <li>Your manager will review and approve or reject the request.</li>
                 </ul>
             </div>
@@ -115,23 +124,23 @@
                     <table class="table table-sm mb-0">
                         <tbody>
                             <tr>
-                                <td><i class="bi bi-sun me-1 text-warning"></i>Vacation</td>
+                                <td><i class="bi bi-sun me-1 text-warning"></i>Vacation <span class="badge bg-success ms-1">Paid</span></td>
                                 <td class="text-end">
-                                    <span class="badge bg-primary">@summary.VacationDaysRemaining remaining</span>
-                                    <small class="text-muted ms-1">/ @summary.VacationDaysTotal</small>
-                                </td>
-                            </tr>
-                            <tr class="table-success">
-                                <td><i class="bi bi-hospital me-1 text-success"></i>Sick <span class="badge bg-success ms-1">Paid</span></td>
-                                <td class="text-end">
-                                    <span class="badge bg-success">@summary.SickPaidDaysRemaining remaining</span>
-                                    <small class="text-muted ms-1">/ @summary.SickPaidDaysTotal</small>
+                                    <span class="badge bg-primary">@summary.VacationPaidDaysRemaining remaining</span>
+                                    <small class="text-muted ms-1">/ @summary.VacationPaidDaysTotal</small>
                                 </td>
                             </tr>
                             <tr class="table-danger">
-                                <td><i class="bi bi-thermometer me-1 text-danger"></i>Sick <span class="badge bg-danger ms-1">Unpaid</span></td>
+                                <td><i class="bi bi-sun me-1 text-warning"></i>Vacation <span class="badge bg-danger ms-1">Unpaid</span></td>
                                 <td class="text-end">
-                                    <span class="badge bg-secondary">@summary.SickUnpaidDaysUsed used</span>
+                                    <span class="badge bg-secondary">@summary.VacationUnpaidDaysUsed used</span>
+                                </td>
+                            </tr>
+                            <tr class="table-success">
+                                <td><i class="bi bi-hospital me-1 text-success"></i>Sick Leave <span class="badge bg-success ms-1">Paid</span></td>
+                                <td class="text-end">
+                                    <span class="badge bg-success">@summary.SickDaysRemaining remaining</span>
+                                    <small class="text-muted ms-1">/ @summary.SickDaysTotal</small>
                                 </td>
                             </tr>
                             <tr>
@@ -155,23 +164,31 @@
 
 @section Scripts {
     <script>
-        var sickPaidRemaining = @(ViewBag.TimeOffSummary != null ? ((StaffShift.Core.DTOs.TimeOffSummaryDto)ViewBag.TimeOffSummary).SickPaidDaysRemaining : 10);
+        var vacationPaidRemaining = @(ViewBag.TimeOffSummary != null ? ((StaffShift.Core.DTOs.TimeOffSummaryDto)ViewBag.TimeOffSummary).VacationPaidDaysRemaining : 20);
+        var sickDaysRemaining = @(ViewBag.TimeOffSummary != null ? ((StaffShift.Core.DTOs.TimeOffSummaryDto)ViewBag.TimeOffSummary).SickDaysRemaining : 10);
 
         var typeSelect = document.getElementById('requestTypeSelect');
-        var sickSection = document.getElementById('sickPaySection');
+        var vacationSection = document.getElementById('vacationPaySection');
+        var sickSection = document.getElementById('sickInfoSection');
 
-        function toggleSickSection() {
-            if (typeSelect.value === 'Sick') {
+        function toggleSections() {
+            if (typeSelect.value === 'Vacation') {
+                vacationSection.style.display = 'block';
+                sickSection.style.display = 'none';
+                document.getElementById('paidVacationRemaining').innerHTML =
+                    '<small class="text-success"><i class="bi bi-info-circle me-1"></i>You have <strong>' + vacationPaidRemaining + '</strong> paid vacation days remaining.</small>';
+            } else if (typeSelect.value === 'Sick') {
+                vacationSection.style.display = 'none';
                 sickSection.style.display = 'block';
-                document.getElementById('paidSickRemaining').innerHTML =
-                    '<small class="text-success"><i class="bi bi-info-circle me-1"></i>You have <strong>' + sickPaidRemaining + '</strong> paid sick days remaining.</small>';
+                document.getElementById('sickDaysRemainingText').textContent = 'You have ' + sickDaysRemaining + ' sick days remaining.';
             } else {
+                vacationSection.style.display = 'none';
                 sickSection.style.display = 'none';
             }
         }
 
-        typeSelect.addEventListener('change', toggleSickSection);
-        toggleSickSection();
+        typeSelect.addEventListener('change', toggleSections);
+        toggleSections();
 
         // Day count calculator
         var startInput = document.getElementById('StartDate');

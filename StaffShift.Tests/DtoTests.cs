@@ -45,31 +45,34 @@ public class DtoTests
         var summary = new TimeOffSummaryDto
         {
             VacationDaysTotal = 20,
-            VacationDaysUsed = 7
+            VacationPaidDaysTotal = 20,
+            VacationPaidDaysUsed = 5,
+            VacationUnpaidDaysUsed = 2
         };
-        Assert.Equal(13, summary.VacationDaysRemaining);
+        // VacationDaysRemaining = VacationPaidDaysTotal - VacationPaidDaysUsed = 20 - 5 = 15
+        Assert.Equal(15, summary.VacationDaysRemaining);
     }
 
     [Fact]
-    public void TimeOffSummaryDto_SickPaidDaysRemaining_CalculatedCorrectly()
+    public void TimeOffSummaryDto_VacationPaidDaysRemaining_CalculatedCorrectly()
     {
         var summary = new TimeOffSummaryDto
         {
-            SickPaidDaysTotal = 10,
-            SickPaidDaysUsed = 3
+            VacationPaidDaysTotal = 20,
+            VacationPaidDaysUsed = 5
         };
-        Assert.Equal(7, summary.SickPaidDaysRemaining);
+        Assert.Equal(15, summary.VacationPaidDaysRemaining);
     }
 
     [Fact]
-    public void TimeOffSummaryDto_SickDaysUsed_CombinesPaidAndUnpaid()
+    public void TimeOffSummaryDto_VacationDaysUsed_CombinesPaidAndUnpaid()
     {
         var summary = new TimeOffSummaryDto
         {
-            SickPaidDaysUsed = 4,
-            SickUnpaidDaysUsed = 2
+            VacationPaidDaysUsed = 8,
+            VacationUnpaidDaysUsed = 3
         };
-        Assert.Equal(6, summary.SickDaysUsed);
+        Assert.Equal(11, summary.VacationDaysUsed);
     }
 
     [Fact]
@@ -77,10 +80,10 @@ public class DtoTests
     {
         var summary = new TimeOffSummaryDto
         {
-            VacationDaysUsed = 5,
-            SickPaidDaysUsed = 2,
-            SickUnpaidDaysUsed = 1,
-            PersonalDaysUsed = 3
+            VacationPaidDaysUsed = 5,
+            VacationUnpaidDaysUsed = 2,
+            SickDaysUsed = 3,
+            PersonalDaysUsed = 1
         };
         Assert.Equal(11, summary.TotalDaysUsed);
     }
@@ -97,14 +100,14 @@ public class DtoTests
     }
 
     [Fact]
-    public void TimeOffSummaryDto_SickDaysRemaining_ReturnsZeroWhenNone()
+    public void TimeOffSummaryDto_SickDaysRemaining_CalculatedCorrectly()
     {
         var summary = new TimeOffSummaryDto
         {
-            SickPaidDaysTotal = 10,
-            SickPaidDaysUsed = 10
+            SickDaysTotal = 10,
+            SickDaysUsed = 3
         };
-        Assert.Equal(0, summary.SickDaysRemaining);
+        Assert.Equal(7, summary.SickDaysRemaining);
     }
 
     // ---- ForumPostDto computed properties ----

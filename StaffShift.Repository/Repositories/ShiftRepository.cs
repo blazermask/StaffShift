@@ -25,22 +25,26 @@ public class ShiftRepository : Repository<Shift>, IShiftRepository
 
     public async Task<IEnumerable<Shift>> GetShiftsByDateRangeAsync(DateTime startDate, DateTime endDate)
     {
-        return await _dbSet
+        // SQLite doesn't support ordering by TimeSpan directly
+        var shifts = await _dbSet
             .Include(s => s.User)
             .Where(s => s.ShiftDate >= startDate && s.ShiftDate <= endDate)
             .OrderBy(s => s.ShiftDate)
-            .ThenBy(s => s.StartTime)
             .ToListAsync();
+        
+        return shifts.OrderBy(s => s.ShiftDate).ThenBy(s => s.StartTime.Ticks);
     }
 
     public async Task<IEnumerable<Shift>> GetShiftsByUserAndDateRangeAsync(int userId, DateTime startDate, DateTime endDate)
     {
-        return await _dbSet
+        // SQLite doesn't support ordering by TimeSpan directly
+        var shifts = await _dbSet
             .Include(s => s.User)
             .Where(s => s.UserId == userId && s.ShiftDate >= startDate && s.ShiftDate <= endDate)
             .OrderBy(s => s.ShiftDate)
-            .ThenBy(s => s.StartTime)
             .ToListAsync();
+        
+        return shifts.OrderBy(s => s.ShiftDate).ThenBy(s => s.StartTime.Ticks);
     }
 
     public async Task<Shift?> GetShiftByUserAndDateAsync(int userId, DateTime date)
@@ -55,21 +59,25 @@ public class ShiftRepository : Repository<Shift>, IShiftRepository
         var today = DateTime.UtcNow.Date;
         var endDate = today.AddDays(days);
         
-        return await _dbSet
+        // SQLite doesn't support ordering by TimeSpan directly, so we order by Ticks
+        var shifts = await _dbSet
             .Include(s => s.User)
             .Where(s => s.UserId == userId && s.ShiftDate >= today && s.ShiftDate <= endDate)
             .OrderBy(s => s.ShiftDate)
-            .ThenBy(s => s.StartTime)
             .ToListAsync();
+        
+        return shifts.OrderBy(s => s.ShiftDate).ThenBy(s => s.StartTime.Ticks);
     }
 
     public async Task<IEnumerable<Shift>> GetTeamShiftsAsync(int managerId, DateTime startDate, DateTime endDate)
     {
-        return await _dbSet
+        // SQLite doesn't support ordering by TimeSpan directly
+        var shifts = await _dbSet
             .Include(s => s.User)
             .Where(s => s.User.ManagerId == managerId && s.ShiftDate >= startDate && s.ShiftDate <= endDate)
             .OrderBy(s => s.ShiftDate)
-            .ThenBy(s => s.StartTime)
             .ToListAsync();
+        
+        return shifts.OrderBy(s => s.ShiftDate).ThenBy(s => s.StartTime.Ticks);
     }
 }

@@ -111,13 +111,13 @@ public class TimeOffServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task CreateRequestAsync_SickPaid_SetsPaidFlagTrue()
+    public async Task CreateRequestAsync_VacationPaid_SetsPaidFlagTrue()
     {
         var model = new CreateTimeOffRequestDto
         {
             StartDate = DateTime.Today.AddDays(1),
             EndDate = DateTime.Today.AddDays(1),
-            RequestType = "Sick",
+            RequestType = "Vacation",
             IsPaid = true
         };
 
@@ -125,17 +125,17 @@ public class TimeOffServiceTests : IDisposable
 
         Assert.True(result.Success);
         Assert.True(result.Request!.IsPaid);
-        Assert.Equal("Sick", result.Request.RequestType);
+        Assert.Equal("Vacation", result.Request.RequestType);
     }
 
     [Fact]
-    public async Task CreateRequestAsync_SickUnpaid_SetsPaidFlagFalse()
+    public async Task CreateRequestAsync_VacationUnpaid_SetsPaidFlagFalse()
     {
         var model = new CreateTimeOffRequestDto
         {
             StartDate = DateTime.Today.AddDays(2),
             EndDate = DateTime.Today.AddDays(2),
-            RequestType = "Sick",
+            RequestType = "Vacation",
             IsPaid = false
         };
 
@@ -280,20 +280,20 @@ public class TimeOffServiceTests : IDisposable
         var year = DateTime.UtcNow.Year;
         await _context.TimeOffRequests.AddRangeAsync(
             new TimeOffRequest { UserId = 2, StartDate = new DateTime(year, 3, 1), EndDate = new DateTime(year, 3, 5), RequestType = "Vacation", Status = "Approved", IsPaid = true },
-            new TimeOffRequest { UserId = 2, StartDate = new DateTime(year, 4, 1), EndDate = new DateTime(year, 4, 2), RequestType = "Sick", Status = "Approved", IsPaid = true },
-            new TimeOffRequest { UserId = 2, StartDate = new DateTime(year, 5, 1), EndDate = new DateTime(year, 5, 1), RequestType = "Sick", Status = "Approved", IsPaid = false }
+            new TimeOffRequest { UserId = 2, StartDate = new DateTime(year, 4, 1), EndDate = new DateTime(year, 4, 2), RequestType = "Vacation", Status = "Approved", IsPaid = false },
+            new TimeOffRequest { UserId = 2, StartDate = new DateTime(year, 5, 1), EndDate = new DateTime(year, 5, 1), RequestType = "Sick", Status = "Approved", IsPaid = true }
         );
         await _context.SaveChangesAsync();
 
         var summary = await _timeOffService.GetTimeOffSummaryAsync(2, year);
 
         Assert.Equal(2, summary.UserId);
-        Assert.Equal(5, summary.VacationDaysUsed);
-        Assert.Equal(2, summary.SickPaidDaysUsed);
-        Assert.Equal(1, summary.SickUnpaidDaysUsed);
-        Assert.Equal(3, summary.SickDaysUsed);
-        Assert.Equal(15, summary.VacationDaysRemaining);
-        Assert.Equal(8, summary.SickPaidDaysRemaining);
+        Assert.Equal(5, summary.VacationPaidDaysUsed);
+        Assert.Equal(2, summary.VacationUnpaidDaysUsed);
+        Assert.Equal(7, summary.VacationDaysUsed);
+        Assert.Equal(1, summary.SickDaysUsed);
+        Assert.Equal(15, summary.VacationPaidDaysRemaining);
+        Assert.Equal(9, summary.SickDaysRemaining);
     }
 
     [Fact]

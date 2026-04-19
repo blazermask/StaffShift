@@ -49,16 +49,7 @@
             color: #718096;
             font-size: 0.875rem;
         }
-        .demo-accounts {
-            background: #f7fafc;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-top: 1rem;
-            font-size: 0.8rem;
-        }
-        .demo-accounts h6 { color: #4a5568; font-weight: 600; margin-bottom: 0.5rem; }
-        .demo-badge { cursor: pointer; }
-    </style>
+        </style>
 </head>
 <body>
     <div class="login-wrapper">
@@ -70,16 +61,14 @@
             </div>
 
             <form asp-action="Login" method="post">
-                <input type="hidden" asp-for="UsernameOrEmail" id="hiddenUsernameOrEmail" />
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" style="display:@(ViewContext.ModelState.ErrorCount > 0 ? "block" : "none")"></div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Username or Email</label>
+                    <label asp-for="UsernameOrEmail" class="form-label fw-semibold">Username or Email</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-person"></i></span>
-                        <input id="usernameOrEmailInput" name="UsernameOrEmail" class="form-control"
-                               placeholder="Enter username or email" autocomplete="username"
-                               value="@Model?.UsernameOrEmail" required />
+                        <input asp-for="UsernameOrEmail" class="form-control"
+                               placeholder="Enter username or email" autocomplete="username" required />
                     </div>
                 </div>
 
@@ -112,26 +101,15 @@
                 </div>
             </form>
 
-            <div class="demo-accounts mt-3">
-                <h6><i class="bi bi-info-circle me-1"></i>Demo Accounts</h6>
-                <div class="d-flex flex-wrap gap-1">
-                    <span class="badge bg-danger demo-badge" onclick="fillLogin('ceo','CEO123!')">CEO: ceo / CEO123!</span>
-                    <span class="badge bg-warning text-dark demo-badge" onclick="fillLogin('manager','Manager123!')">Manager: manager / Manager123!</span>
-                    <span class="badge bg-success demo-badge" onclick="fillLogin('worker','Worker123!')">Worker: worker / Worker123!</span>
-                </div>
-            </div>
+            
         </div>
     </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
     <script>
-        function fillLogin(username, password) {
-            document.getElementById('usernameOrEmailInput').value = username;
-            document.querySelector('input[name="Password"]').value = password;
-        }
         document.getElementById('togglePassword').addEventListener('click', function () {
             var input = document.querySelector('input[name="Password"]');
             var icon = document.getElementById('eyeIcon');

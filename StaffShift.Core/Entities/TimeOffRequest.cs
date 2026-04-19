@@ -31,7 +31,8 @@ public class TimeOffRequest
     public string RequestType { get; set; } = "Vacation";
 
     /// <summary>
-    /// Whether the sick day is paid (true) or unpaid (false). Only applies to Sick type requests.
+    /// Whether the vacation is paid (true) or unpaid (false). Only applies to Vacation type requests.
+    /// Sick leave is always paid.
     /// </summary>
     public bool IsPaid { get; set; } = true;
 

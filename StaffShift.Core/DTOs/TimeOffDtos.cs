@@ -24,7 +24,7 @@ public class TimeOffRequestDto
     public DateTime? ReviewedAt { get; set; }
     public string? ReviewNotes { get; set; }
     public string? ManagerNotes { get; set; }
-    public string? ReviewerName { get; set; }
+    public string? ReviewerName => ReviewedByName;
     public DateTime CreatedAt { get; set; }
     public bool IsCurrentUser { get; set; }
     public bool CanApprove { get; set; }
@@ -52,7 +52,8 @@ public class CreateTimeOffRequestDto
     public string? Reason { get; set; }
 
     /// <summary>
-    /// Whether the sick day is paid (true) or unpaid (false). Only for Sick requests.
+    /// Whether the vacation is paid (true) or unpaid (false). Only for Vacation requests.
+    /// Sick leave is always paid.
     /// </summary>
     public bool IsPaid { get; set; } = true;
 }
@@ -79,30 +80,30 @@ public class ReviewTimeOffRequestDto
 public class TimeOffSummaryDto
 {
     public int UserId { get; set; }
-    
-    // Vacation
-    public int VacationDaysUsed { get; set; }
+
+    // Vacation - paid
+    public int VacationPaidDaysUsed { get; set; }
+    public int VacationPaidDaysTotal { get; set; }
+    public int VacationPaidDaysRemaining => VacationPaidDaysTotal - VacationPaidDaysUsed;
+
+    // Vacation - unpaid
+    public int VacationUnpaidDaysUsed { get; set; }
+
+    // Combined vacation (for backward compat)
+    public int VacationDaysUsed => VacationPaidDaysUsed + VacationUnpaidDaysUsed;
     public int VacationDaysTotal { get; set; }
-    public int VacationDaysRemaining => VacationDaysTotal - VacationDaysUsed;
-    
-    // Sick days - paid
-    public int SickPaidDaysUsed { get; set; }
-    public int SickPaidDaysTotal { get; set; }
-    public int SickPaidDaysRemaining => SickPaidDaysTotal - SickPaidDaysUsed;
-    
-    // Sick days - unpaid
-    public int SickUnpaidDaysUsed { get; set; }
-    
-    // Combined sick (for backward compat)
-    public int SickDaysUsed => SickPaidDaysUsed + SickUnpaidDaysUsed;
+    public int VacationDaysRemaining => Math.Max(0, VacationPaidDaysTotal - VacationPaidDaysUsed);
+
+    // Sick days (always paid)
+    public int SickDaysUsed { get; set; }
     public int SickDaysTotal { get; set; }
-    public int SickDaysRemaining => Math.Max(0, SickPaidDaysTotal - SickPaidDaysUsed);
-    
+    public int SickDaysRemaining => SickDaysTotal - SickDaysUsed;
+
     // Personal
     public int PersonalDaysUsed { get; set; }
     public int PersonalDaysTotal { get; set; }
     public int PersonalDaysRemaining => PersonalDaysTotal - PersonalDaysUsed;
-    
+
     // Totals
     public int TotalDaysUsed => VacationDaysUsed + SickDaysUsed + PersonalDaysUsed;
     public int TotalDaysRemaining => VacationDaysRemaining + SickDaysRemaining + PersonalDaysRemaining;

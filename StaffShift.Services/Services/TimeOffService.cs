@@ -95,7 +95,7 @@ public class TimeOffService : ITimeOffService
             EndDate = model.EndDate,
             RequestType = model.RequestType,
             Reason = model.Reason,
-            IsPaid = model.RequestType == "Sick" ? model.IsPaid : true,
+            IsPaid = model.RequestType == "Vacation" ? model.IsPaid : true,
             Status = "Pending",
             CreatedAt = DateTime.UtcNow
         };
@@ -164,20 +164,21 @@ public class TimeOffService : ITimeOffService
     {
         var requests = await _timeOffRepository.GetApprovedTimeOffByUserAsync(userId, year);
 
-        int vacationDays = 0, sickPaidDays = 0, sickUnpaidDays = 0, personalDays = 0;
+        int vacationPaidDays = 0, vacationUnpaidDays = 0, sickDays = 0, personalDays = 0;
 
         foreach (var request in requests)
         {
             switch (request.RequestType)
             {
                 case "Vacation":
-                    vacationDays += request.DaysRequested;
+                    if (request.IsPaid)
+                        vacationPaidDays += request.DaysRequested;
+                    else
+                        vacationUnpaidDays += request.DaysRequested;
                     break;
                 case "Sick":
-                    if (request.IsPaid)
-                        sickPaidDays += request.DaysRequested;
-                    else
-                        sickUnpaidDays += request.DaysRequested;
+                    // Sick leave is always paid
+                    sickDays += request.DaysRequested;
                     break;
                 case "Personal":
                     personalDays += request.DaysRequested;
@@ -188,14 +189,14 @@ public class TimeOffService : ITimeOffService
         return new TimeOffSummaryDto
         {
             UserId = userId,
-            VacationDaysUsed = vacationDays,
-            VacationDaysTotal = 20,       // Default annual allowance
-            SickPaidDaysUsed = sickPaidDays,
-            SickPaidDaysTotal = 10,       // Default paid sick day allowance
-            SickUnpaidDaysUsed = sickUnpaidDays,
-            SickDaysTotal = 10,
+            VacationPaidDaysUsed = vacationPaidDays,
+            VacationPaidDaysTotal = 20,       // Default paid vacation allowance
+            VacationUnpaidDaysUsed = vacationUnpaidDays,
+            VacationDaysTotal = 20,
+            SickDaysUsed = sickDays,
+            SickDaysTotal = 10,               // Default sick day allowance
             PersonalDaysUsed = personalDays,
-            PersonalDaysTotal = 5         // Default personal day allowance
+            PersonalDaysTotal = 5             // Default personal day allowance
         };
     }
 
@@ -220,7 +221,6 @@ public class TimeOffService : ITimeOffService
             Status = request.Status,
             ReviewedBy = request.ReviewedBy,
             ReviewedByName = reviewer?.UserName,
-            ReviewerName = reviewer?.UserName,
             ReviewedAt = request.ReviewedAt,
             ReviewNotes = request.ReviewNotes,
             ManagerNotes = request.ReviewNotes,

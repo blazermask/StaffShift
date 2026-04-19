@@ -113,7 +113,7 @@ public class DashboardController : Controller
                 end = shift.ShiftDate.ToString("yyyy-MM-dd") + "T" + shift.EndTime.ToString(@"hh\:mm\:ss"),
                 color,
                 textColor = "#fff",
-                extendedProps = new { type = "shift", status = shift.Status, location = shift.Location ?? "" }
+                extendedProps = new { type = "shift", status = shift.Status, notes = shift.Notes ?? "" }
             });
         }
 
@@ -129,12 +129,12 @@ public class DashboardController : Controller
             };
             var icon = req.RequestType switch
             {
-                "Vacation" => "🏖️",
-                "Sick" => req.IsPaid ? "🏥" : "🤒",
+                "Vacation" => req.IsPaid ? "🏖️" : "⛱️",
+                "Sick" => "🏥",
                 "Personal" => "👤",
                 _ => "📅"
             };
-            var paidLabel = req.RequestType == "Sick" ? (req.IsPaid ? " (Paid)" : " (Unpaid)") : "";
+            var paidLabel = req.RequestType == "Vacation" ? (req.IsPaid ? " (Paid)" : " (Unpaid)") : "";
             events.Add(new
             {
                 id = $"timeoff-{req.Id}",
@@ -177,7 +177,7 @@ public class DashboardController : Controller
                 var memberTimeOff = await _timeOffService.GetRequestsByUserAsync(member.Id, userId);
                 foreach (var req in memberTimeOff.Where(r => r.StartDate >= fromDate && r.StartDate <= toDate && r.Status == "Approved"))
                 {
-                    var paidLabel = req.RequestType == "Sick" ? (req.IsPaid ? " (Paid)" : " (Unpaid)") : "";
+                    var paidLabel = req.RequestType == "Vacation" ? (req.IsPaid ? " (Paid)" : " (Unpaid)") : "";
                     events.Add(new
                     {
                         id = $"team-timeoff-{req.Id}",
