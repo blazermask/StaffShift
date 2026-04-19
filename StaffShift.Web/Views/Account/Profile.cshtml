@@ -1,0 +1,120 @@
+@model UserDto
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="page-header">
+    <h1><i class="bi bi-person-circle me-2"></i>My Profile</h1>
+</div>
+
+<div class="row">
+    <div class="col-lg-4">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            <div class="profile-name">@Model.FirstName @Model.LastName</div>
+            <div class="profile-role">
+                @if (Model.Roles != null && Model.Roles.Any())
+                {
+                    <span class="badge bg-light text-dark">@string.Join(", ", Model.Roles)</span>
+                }
+            </div>
+            <div class="mt-2">
+                <small><i class="bi bi-envelope me-1"></i>@Model.Email</small>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Account Information</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Employee ID</dt>
+                    <dd class="col-sm-8">@(Model.EmployeeId ?? "Not assigned")</dd>
+                    
+                    <dt class="col-sm-4">Department</dt>
+                    <dd class="col-sm-8">@(Model.Department ?? "Not assigned")</dd>
+                    
+                    <dt class="col-sm-4">Position</dt>
+                    <dd class="col-sm-8">@(Model.Position ?? "Not assigned")</dd>
+                    
+                    @if (Model.ManagerId.HasValue)
+                    {
+                        <dt class="col-sm-4">Manager</dt>
+                        <dd class="col-sm-8">@Model.ManagerName</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-pencil me-2"></i>Update Profile</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="UpdateProfile" method="post">
+                    <input type="hidden" name="Id" value="@Model.Id" />
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">First Name</label>
+                            <input type="text" name="FirstName" value="@Model.FirstName" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" name="LastName" value="@Model.LastName" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Department</label>
+                            <input type="text" name="Department" value="@Model.Department" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Position</label>
+                            <input type="text" name="Position" value="@Model.Position" class="form-control" />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-2"></i>Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-key me-2"></i>Change Password</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="ChangePassword" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" name="CurrentPassword" class="form-control" required />
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">New Password</label>
+                            <input type="password" name="NewPassword" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Confirm New Password</label>
+                            <input type="password" name="ConfirmPassword" class="form-control" required />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-shield-lock me-2"></i>Change Password
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,124 @@
+@model CEODashboardViewModel
+@{
+    ViewData["Title"] = "CEO Dashboard";
+}
+
+<div class="page-header">
+    <h1><i class="bi bi-building me-2"></i>Company Dashboard</h1>
+    <p class="text-muted mb-0">Overview of your organization</p>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="stat-card primary">
+            <div class="stat-icon"><i class="bi bi-people"></i></div>
+            <div class="stat-value">@Model.TotalEmployees</div>
+            <div class="stat-label">Total Employees</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="stat-card success">
+            <div class="stat-icon"><i class="bi bi-person-badge"></i></div>
+            <div class="stat-value">@Model.TotalManagers</div>
+            <div class="stat-label">Managers</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="stat-card info">
+            <div class="stat-icon"><i class="bi bi-person"></i></div>
+            <div class="stat-value">@Model.TotalWorkers</div>
+            <div class="stat-label">Workers</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="stat-card warning">
+            <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
+            <div class="stat-value">@Model.UnassignedWorkers</div>
+            <div class="stat-label">Unassigned Workers</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-hourglass-split me-2"></i>Pending Time Off Requests</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.PendingTimeOffRequests > 0)
+                {
+                    <div class="d-flex align-items-center">
+                        <div class="display-4 text-warning me-3">@Model.PendingTimeOffRequests</div>
+                        <div>
+                            <p class="mb-0">requests awaiting approval</p>
+                            <a asp-controller="Manager" asp-action="TimeOffRequests" class="btn btn-sm btn-outline-primary mt-2">
+                                Review Now <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-check-circle fs-1"></i>
+                        <p class="mt-2 mb-0">All requests have been reviewed!</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-calendar-today me-2"></i>Today's Shifts</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="display-4 text-info me-3">@Model.RecentShifts</div>
+                    <div>
+                        <p class="mb-0">shifts scheduled today</p>
+                        <a asp-controller="Manager" asp-action="Shifts" class="btn btn-sm btn-outline-primary mt-2">
+                            View Shifts <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 col-sm-6 mb-2">
+                        <a asp-action="Employees" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-people me-2"></i>Manage Employees
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-2">
+                        <a asp-action="Departments" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-diagram-3 me-2"></i>View Departments
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-2">
+                        <a asp-action="Reports" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-graph-up me-2"></i>View Reports
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-2">
+                        <a asp-action="CreateEmployee" class="btn btn-primary w-100">
+                            <i class="bi bi-person-plus me-2"></i>Add Employee
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

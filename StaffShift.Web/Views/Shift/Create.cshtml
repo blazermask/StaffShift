@@ -1,0 +1,106 @@
+@model CreateShiftDto
+@{
+    ViewData["Title"] = "Request Shift";
+}
+
+<div class="page-header">
+    <h1><i class="bi bi-plus-circle me-2"></i>Request Shift</h1>
+    <p class="text-muted mb-0">Submit a shift request for approval</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="ShiftDate" class="form-label">Shift Date</label>
+                        <input asp-for="ShiftDate" type="date" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="ShiftDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="StartTime" class="form-label">Start Time</label>
+                            <input asp-for="StartTime" type="time" class="form-control" />
+                            <span asp-validation-for="StartTime" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="EndTime" class="form-label">End Time</label>
+                            <input asp-for="EndTime" type="time" class="form-control" />
+                            <span asp-validation-for="EndTime" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label">Notes (Optional)</label>
+                        <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Add any notes about this shift..."></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-2"></i>Submit Request
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-info-circle me-2"></i>Shift Request Guidelines</h5>
+                <ul class="mb-0">
+                    <li>Shift requests must be submitted at least 24 hours in advance.</li>
+                    <li>Standard shifts are 8 hours with a 30-minute break.</li>
+                    <li>Overtime shifts require manager approval.</li>
+                    <li>You will be notified once your request is processed.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-clock-history me-2"></i>Standard Shift Hours</h5>
+                <table class="table table-sm mb-0">
+                    <tbody>
+                        <tr>
+                            <td><strong>Morning Shift</strong></td>
+                            <td>06:00 - 14:00</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Afternoon Shift</strong></td>
+                            <td>14:00 - 22:00</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Night Shift</strong></td>
+                            <td>22:00 - 06:00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Set default times based on common shifts
+        document.querySelector('#StartTime').addEventListener('change', function() {
+            const start = this.value;
+            if (start) {
+                const [hours, minutes] = start.split(':');
+                const endHours = (parseInt(hours) + 8) % 24;
+                const end = endHours.toString().padStart(2, '0') + ':' + minutes;
+                document.querySelector('#EndTime').value = end;
+            }
+        });
+    </script>
+}

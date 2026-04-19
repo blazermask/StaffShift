@@ -1,0 +1,200 @@
+@model CreateTimeOffRequestDto
+@{
+    ViewData["Title"] = "Request Time Off";
+}
+
+<div class="page-header">
+    <h1><i class="bi bi-calendar-x me-2"></i>Request Time Off</h1>
+    <p class="text-muted mb-0">Submit your vacation, sick, or personal time request</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="RequestType" class="form-label fw-semibold">Request Type</label>
+                        <select asp-for="RequestType" class="form-select" id="requestTypeSelect">
+                            <option value="Vacation">🏖️ Vacation</option>
+                            <option value="Sick">🏥 Sick Leave</option>
+                            <option value="Personal">👤 Personal Time</option>
+                            <option value="Other">📅 Other</option>
+                        </select>
+                        <span asp-validation-for="RequestType" class="text-danger"></span>
+                    </div>
+
+                    <!-- Paid/Unpaid Sick Day - only shows for Sick Leave -->
+                    <div class="mb-3" id="sickPaySection" style="display:none">
+                        <label class="form-label fw-semibold">Sick Day Type</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="IsPaid" id="isPaidTrue" value="true" checked />
+                                <label class="form-check-label" for="isPaidTrue">
+                                    <span class="badge bg-success me-1">Paid</span>
+                                    <small class="text-muted">Uses paid sick day allowance</small>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="IsPaid" id="isPaidFalse" value="false" />
+                                <label class="form-check-label" for="isPaidFalse">
+                                    <span class="badge bg-danger me-1">Unpaid</span>
+                                    <small class="text-muted">No deduction from allowance</small>
+                                </label>
+                            </div>
+                        </div>
+                        <div id="paidSickRemaining" class="mt-2"></div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="StartDate" class="form-label fw-semibold">Start Date</label>
+                            <input asp-for="StartDate" type="date" class="form-control"
+                                   min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="EndDate" class="form-label fw-semibold">End Date</label>
+                            <input asp-for="EndDate" type="date" class="form-control"
+                                   min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div id="dayCountBadge" class="alert alert-info py-2 px-3 mb-2" style="display:none">
+                            <i class="bi bi-info-circle me-1"></i>
+                            <span id="dayCountText"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Reason" class="form-label fw-semibold">Reason <small class="text-muted">(optional)</small></label>
+                        <textarea asp-for="Reason" class="form-control" rows="3"
+                                  placeholder="Please provide a brief explanation..."></textarea>
+                        <span asp-validation-for="Reason" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send me-2"></i>Submit Request
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card bg-light border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-info-circle me-2 text-primary"></i>Request Guidelines</h5>
+                <ul class="mb-0 small">
+                    <li class="mb-1"><strong>🏖️ Vacation:</strong> Submit at least 2 weeks in advance.</li>
+                    <li class="mb-1"><strong>🏥 Sick (Paid):</strong> Uses your annual paid sick day allowance (10 days/year).</li>
+                    <li class="mb-1"><strong>🤒 Sick (Unpaid):</strong> No pay deduction from allowance; manager approval required.</li>
+                    <li class="mb-1"><strong>👤 Personal:</strong> Provide at least 48 hours notice.</li>
+                    <li>Your manager will review and approve or reject the request.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-semibold">
+                <i class="bi bi-calendar-check me-2 text-success"></i>Your Time Off Balance (@DateTime.Now.Year)
+            </div>
+            <div class="card-body p-0">
+                @if (ViewBag.TimeOffSummary != null)
+                {
+                    var summary = (StaffShift.Core.DTOs.TimeOffSummaryDto)ViewBag.TimeOffSummary;
+                    <table class="table table-sm mb-0">
+                        <tbody>
+                            <tr>
+                                <td><i class="bi bi-sun me-1 text-warning"></i>Vacation</td>
+                                <td class="text-end">
+                                    <span class="badge bg-primary">@summary.VacationDaysRemaining remaining</span>
+                                    <small class="text-muted ms-1">/ @summary.VacationDaysTotal</small>
+                                </td>
+                            </tr>
+                            <tr class="table-success">
+                                <td><i class="bi bi-hospital me-1 text-success"></i>Sick <span class="badge bg-success ms-1">Paid</span></td>
+                                <td class="text-end">
+                                    <span class="badge bg-success">@summary.SickPaidDaysRemaining remaining</span>
+                                    <small class="text-muted ms-1">/ @summary.SickPaidDaysTotal</small>
+                                </td>
+                            </tr>
+                            <tr class="table-danger">
+                                <td><i class="bi bi-thermometer me-1 text-danger"></i>Sick <span class="badge bg-danger ms-1">Unpaid</span></td>
+                                <td class="text-end">
+                                    <span class="badge bg-secondary">@summary.SickUnpaidDaysUsed used</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><i class="bi bi-person me-1 text-info"></i>Personal</td>
+                                <td class="text-end">
+                                    <span class="badge bg-info">@summary.PersonalDaysRemaining remaining</span>
+                                    <small class="text-muted ms-1">/ @summary.PersonalDaysTotal</small>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted p-3 mb-0 small">Balance info will appear once requests have been approved.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var sickPaidRemaining = @(ViewBag.TimeOffSummary != null ? ((StaffShift.Core.DTOs.TimeOffSummaryDto)ViewBag.TimeOffSummary).SickPaidDaysRemaining : 10);
+
+        var typeSelect = document.getElementById('requestTypeSelect');
+        var sickSection = document.getElementById('sickPaySection');
+
+        function toggleSickSection() {
+            if (typeSelect.value === 'Sick') {
+                sickSection.style.display = 'block';
+                document.getElementById('paidSickRemaining').innerHTML =
+                    '<small class="text-success"><i class="bi bi-info-circle me-1"></i>You have <strong>' + sickPaidRemaining + '</strong> paid sick days remaining.</small>';
+            } else {
+                sickSection.style.display = 'none';
+            }
+        }
+
+        typeSelect.addEventListener('change', toggleSickSection);
+        toggleSickSection();
+
+        // Day count calculator
+        var startInput = document.getElementById('StartDate');
+        var endInput = document.getElementById('EndDate');
+
+        function updateDayCount() {
+            var start = new Date(startInput.value);
+            var end = new Date(endInput.value);
+            if (!isNaN(start) && !isNaN(end) && end >= start) {
+                var days = Math.floor((end - start) / 86400000) + 1;
+                document.getElementById('dayCountText').textContent = days + ' day' + (days > 1 ? 's' : '') + ' requested';
+                document.getElementById('dayCountBadge').style.display = 'block';
+            } else {
+                document.getElementById('dayCountBadge').style.display = 'none';
+            }
+        }
+
+        startInput.addEventListener('change', function () {
+            if (!endInput.value || endInput.value < this.value)
+                endInput.value = this.value;
+            endInput.min = this.value;
+            updateDayCount();
+        });
+        endInput.addEventListener('change', updateDayCount);
+    </script>
+}

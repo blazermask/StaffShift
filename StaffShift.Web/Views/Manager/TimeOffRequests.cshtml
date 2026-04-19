@@ -1,0 +1,83 @@
+@model IEnumerable<TimeOffRequestDto>
+@{
+    ViewData["Title"] = "Time Off Requests";
+}
+
+<div class="page-header">
+    <h1><i class="bi bi-calendar-check me-2"></i>Time Off Requests</h1>
+    <p class="text-muted mb-0">Review and manage time off requests from your team</p>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Type</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Days</th>
+                            <th>Submitted</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var request in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-size: 0.75rem;">
+                                            @request.UserName?.Substring(0, Math.Min(2, request.UserName.Length))
+                                        </div>
+                                        <div>
+                                            <strong>@request.UserName</strong>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    @switch (request.RequestType)
+                                    {
+                                        case "Vacation":
+                                            <span class="badge bg-success"><i class="bi bi-sun me-1"></i>Vacation</span>
+                                            break;
+                                        case "Sick":
+                                            <span class="badge bg-danger"><i class="bi bi-thermometer me-1"></i>Sick</span>
+                                            break;
+                                        case "Personal":
+                                            <span class="badge bg-info"><i class="bi bi-person me-1"></i>Personal</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">@request.RequestType</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>@request.StartDate.ToString("MMM dd, yyyy")</td>
+                                <td>@request.EndDate.ToString("MMM dd, yyyy")</td>
+                                <td>@request.TotalDays</td>
+                                <td>@request.CreatedAt.ToString("MMM dd")</td>
+                                <td>
+                                    <a asp-controller="TimeOff" asp-action="Review" asp-route-id="@request.Id" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-check-lg me-1"></i>Review
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="bi bi-check-circle"></i>
+                <h5>No Pending Requests</h5>
+                <p>All time off requests have been reviewed.</p>
+            </div>
+        }
+    </div>
+</div>

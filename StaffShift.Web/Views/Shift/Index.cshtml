@@ -1,0 +1,133 @@
+@model IEnumerable<ShiftDto>
+@{
+    ViewData["Title"] = "My Shifts";
+}
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1><i class="bi bi-calendar-week me-2"></i>My Shifts</h1>
+        <p class="text-muted mb-0">View and manage your work shifts</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Request Shift
+    </a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="stat-card info">
+            <div class="stat-icon"><i class="bi bi-clock"></i></div>
+            <div class="stat-value">@ViewBag.ScheduledShifts</div>
+            <div class="stat-label">Scheduled</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="stat-card success">
+            <div class="stat-icon"><i class="bi bi-check-circle"></i></div>
+            <div class="stat-value">@ViewBag.CompletedShifts</div>
+            <div class="stat-label">Completed</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="stat-card danger">
+            <div class="stat-icon"><i class="bi bi-x-circle"></i></div>
+            <div class="stat-value">@ViewBag.MissedShifts</div>
+            <div class="stat-label">Missed</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="stat-card warning">
+            <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+            <div class="stat-value">@ViewBag.TotalHours</div>
+            <div class="stat-label">Hours This Week</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th>Hours</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var shift in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@shift.ShiftDate.ToString("MMM dd, yyyy")</strong>
+                                    <br><small class="text-muted">@shift.ShiftDate.ToString("dddd")</small>
+                                </td>
+                                <td>@shift.StartTime.ToString(@"hh\:mm")</td>
+                                <td>@shift.EndTime.ToString(@"hh\:mm")</td>
+                                <td>
+                                    @{
+                                        var hours = (shift.EndTime - shift.StartTime).TotalHours;
+                                    }
+                                    @hours.ToString("F1")h
+                                </td>
+                                <td>
+                                    @switch (shift.Status)
+                                    {
+                                        case "Scheduled":
+                                            <span class="badge badge-scheduled"><i class="bi bi-clock me-1"></i>Scheduled</span>
+                                            break;
+                                        case "Completed":
+                                            <span class="badge badge-completed"><i class="bi bi-check me-1"></i>Completed</span>
+                                            break;
+                                        case "Missed":
+                                            <span class="badge badge-missed"><i class="bi bi-x me-1"></i>Missed</span>
+                                            break;
+                                        case "Cancelled":
+                                            <span class="badge badge-cancelled"><i class="bi bi-slash-circle me-1"></i>Cancelled</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">@shift.Status</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Details" asp-route-id="@shift.Id" class="btn btn-outline-primary" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        @if (shift.Status == "Scheduled" && shift.ShiftDate.Date >= DateTime.Today)
+                                        {
+                                            <form asp-action="ClockIn" method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="@shift.Id" />
+                                                <button type="submit" class="btn btn-outline-success" title="Clock In">
+                                                    <i class="bi bi-play-circle"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="bi bi-calendar-x"></i>
+                <h5>No Shifts Found</h5>
+                <p>You don't have any shifts scheduled yet.</p>
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>Request Your First Shift
+                </a>
+            </div>
+        }
+    </div>
+</div>

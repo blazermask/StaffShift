@@ -1,0 +1,209 @@
+@using System.Security.Claims
+@{
+    ViewData["Title"] = "Dashboard";
+    var userName = User.FindFirst(ClaimTypes.Name)?.Value ?? "User";
+    var isCEO = User.IsInRole("CEO");
+    var isManager = User.IsInRole("Manager");
+}
+
+<div class="page-header">
+    <h1><i class="bi bi-speedometer2 me-2"></i>Dashboard</h1>
+    <p class="text-muted mb-0">Welcome back, @userName!</p>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="stat-card primary">
+            <div class="stat-icon"><i class="bi bi-calendar-week"></i></div>
+            <div class="stat-value">@ViewBag.TotalShifts</div>
+            <div class="stat-label">Total Shifts</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="stat-card success">
+            <div class="stat-icon"><i class="bi bi-check-circle"></i></div>
+            <div class="stat-value">@ViewBag.CompletedShifts</div>
+            <div class="stat-label">Completed</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="stat-card warning">
+            <div class="stat-icon"><i class="bi bi-calendar-x"></i></div>
+            <div class="stat-value">@ViewBag.PendingRequests</div>
+            <div class="stat-label">Pending Requests</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="stat-card info">
+            <div class="stat-icon"><i class="bi bi-chat-square-text"></i></div>
+            <div class="stat-value">@ViewBag.TotalPosts</div>
+            <div class="stat-label">Forum Posts</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-clock me-2"></i>Upcoming Shifts</h5>
+                <a asp-controller="Shift" asp-action="Index" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                @if (ViewBag.UpcomingShifts != null && ((IEnumerable<dynamic>)ViewBag.UpcomingShifts).Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var shift in ViewBag.UpcomingShifts)
+                                {
+                                    <tr>
+                                        <td>@shift.ShiftDate.ToString("MMM dd, yyyy")</td>
+                                        <td>@shift.StartTime</td>
+                                        <td>@shift.EndTime</td>
+                                        <td><span class="badge badge-@shift.Status.ToLower()">@shift.Status</span></td>
+                                        <td>
+                                            <a asp-controller="Shift" asp-action="Details" asp-route-id="@shift.Id" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="bi bi-calendar-x"></i>
+                        <h5>No Upcoming Shifts</h5>
+                        <p>You don't have any scheduled shifts.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a asp-controller="Shift" asp-action="Create" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Request Shift
+                    </a>
+                    <a asp-controller="TimeOff" asp-action="Create" class="btn btn-outline-primary">
+                        <i class="bi bi-calendar-x me-2"></i>Request Time Off
+                    </a>
+                    <a asp-controller="Forum" asp-action="Create" class="btn btn-outline-primary">
+                        <i class="bi bi-chat-square-text me-2"></i>New Forum Post
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        @if (ViewBag.TimeOffSummary != null)
+        {
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-calendar-check me-2"></i>Time Off Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Vacation Days Used:</span>
+                        <strong>@ViewBag.TimeOffSummary.VacationDaysUsed / @ViewBag.TimeOffSummary.VacationDaysTotal</strong>
+                    </div>
+                    <div class="progress mb-3" style="height: 8px;">
+                        @{
+                            var vacationPercent = ViewBag.TimeOffSummary.VacationDaysTotal > 0 
+                                ? (int)((double)ViewBag.TimeOffSummary.VacationDaysUsed / ViewBag.TimeOffSummary.VacationDaysTotal * 100) 
+                                : 0;
+                        }
+                        <div class="progress-bar bg-success" role="progressbar" style="width: @vacationPercent%"></div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Sick Days Used:</span>
+                        <strong>@ViewBag.TimeOffSummary.SickDaysUsed / @ViewBag.TimeOffSummary.SickDaysTotal</strong>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        @{
+                            var sickPercent = ViewBag.TimeOffSummary.SickDaysTotal > 0 
+                                ? (int)((double)ViewBag.TimeOffSummary.SickDaysUsed / ViewBag.TimeOffSummary.SickDaysTotal * 100) 
+                                : 0;
+                        }
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: @sickPercent%"></div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@if (isManager || isCEO)
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-people me-2"></i>Pending Time Off Requests</h5>
+                    <a asp-controller="Manager" asp-action="TimeOffRequests" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    @if (ViewBag.PendingTimeOffRequests != null && ((IEnumerable<dynamic>)ViewBag.PendingTimeOffRequests).Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Type</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var request in ViewBag.PendingTimeOffRequests)
+                                    {
+                                        <tr>
+                                            <td>@request.UserName</td>
+                                            <td><span class="badge bg-info">@request.RequestType</span></td>
+                                            <td>@request.StartDate.ToString("MMM dd")</td>
+                                            <td>@request.EndDate.ToString("MMM dd")</td>
+                                            <td>
+                                                <a asp-controller="TimeOff" asp-action="Review" asp-route-id="@request.Id" class="btn btn-sm btn-primary">
+                                                    <i class="bi bi-check-lg me-1"></i>Review
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-check-circle"></i>
+                            <h5>No Pending Requests</h5>
+                            <p>All time off requests have been reviewed.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}

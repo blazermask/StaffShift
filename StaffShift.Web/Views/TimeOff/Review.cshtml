@@ -1,0 +1,155 @@
+@model TimeOffRequestDto
+@{
+    ViewData["Title"] = "Review Time Off Request";
+}
+
+<div class="page-header">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-1">
+            <li class="breadcrumb-item"><a asp-action="Index">Time Off Requests</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Review</li>
+        </ol>
+    </nav>
+    <h1><i class="bi bi-calendar-check me-2"></i>Review Time Off Request</h1>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Request from @Model.UserName</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted">Employee</label>
+                        <p class="fs-5 mb-0"><strong>@Model.UserName</strong></p>
+                        @if (!string.IsNullOrEmpty(Model.UserDepartment))
+                        {
+                            <small class="text-muted">@Model.UserDepartment</small>
+                        }
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted">Request Type</label>
+                        <p class="fs-5 mb-0">
+                            @switch (Model.RequestType)
+                            {
+                                case "Vacation":
+                                    <span class="badge bg-success fs-6"><i class="bi bi-sun me-1"></i>Vacation</span>
+                                    break;
+                                case "Sick":
+                                    <span class="badge bg-danger fs-6"><i class="bi bi-thermometer me-1"></i>Sick Leave</span>
+                                    break;
+                                case "Personal":
+                                    <span class="badge bg-info fs-6"><i class="bi bi-person me-1"></i>Personal Time</span>
+                                    break;
+                                default:
+                                    <span class="badge bg-secondary fs-6">@Model.RequestType</span>
+                                    break;
+                            }
+                        </p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted">Days Requested</label>
+                        <p class="fs-5 mb-0"><strong>@Model.TotalDays day@(Model.TotalDays > 1 ? "s" : "")</strong></p>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">Start Date</label>
+                        <p class="fs-5 mb-0"><strong>@Model.StartDate.ToString("dddd, MMMM dd, yyyy")</strong></p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">End Date</label>
+                        <p class="fs-5 mb-0"><strong>@Model.EndDate.ToString("dddd, MMMM dd, yyyy")</strong></p>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Reason))
+                {
+                    <div class="alert alert-info">
+                        <strong>Employee's Reason:</strong>
+                        <p class="mb-0 mt-1">@Model.Reason</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-check-circle me-2"></i>Your Decision</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Review" method="post">
+                    <input type="hidden" name="RequestId" value="@Model.Id" />
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Decision</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="Status" id="approve" value="Approved" checked>
+                            <label class="btn btn-outline-success" for="approve">
+                                <i class="bi bi-check-lg me-1"></i>Approve
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="Status" id="reject" value="Rejected">
+                            <label class="btn btn-outline-danger" for="reject">
+                                <i class="bi bi-x-lg me-1"></i>Reject
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Notes to Employee (Optional)</label>
+                        <textarea name="ManagerNotes" class="form-control" rows="3" placeholder="Add any notes or instructions for the employee..."></textarea>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send me-2"></i>Submit Decision
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Considerations</h5>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>Check if the employee has enough days remaining in their allocation.</li>
+                    <li>Consider team coverage during the requested dates.</li>
+                    <li>Review any conflicting requests from other team members.</li>
+                    <li>For sick leave, no advance notice is typically required.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Request Timeline</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <strong>Submitted</strong>
+                        <br><small class="text-muted">@Model.CreatedAt.ToString("MMM dd 'at' hh:mm tt")</small>
+                    </div>
+                    <div class="timeline-item">
+                        <strong>Pending Review</strong>
+                        <br><small class="text-muted">Waiting for your decision</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

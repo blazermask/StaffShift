@@ -1,0 +1,133 @@
+@model ReportsViewModel
+@{
+    ViewData["Title"] = "Reports";
+}
+
+<div class="page-header">
+    <h1><i class="bi bi-graph-up me-2"></i>Reports</h1>
+    <p class="text-muted mb-0">Company-wide statistics and analytics</p>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="stat-card primary">
+            <div class="stat-icon"><i class="bi bi-people"></i></div>
+            <div class="stat-value">@Model.TotalEmployees</div>
+            <div class="stat-label">Total Employees</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card success">
+            <div class="stat-icon"><i class="bi bi-diagram-3"></i></div>
+            <div class="stat-value">@Model.TotalDepartments</div>
+            <div class="stat-label">Departments</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card info">
+            <div class="stat-icon"><i class="bi bi-calendar-event"></i></div>
+            <div class="stat-value">@Model.ReportDate.ToString("MMM dd")</div>
+            <div class="stat-label">Report Date</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-calendar-x me-2"></i>Time Off Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Total Requests</span>
+                        <strong>@Model.TotalTimeOffRequests</strong>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Approved</span>
+                        <span>@Model.ApprovedRequests</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        @{
+                            var approvedPercent = Model.TotalTimeOffRequests > 0 
+                                ? (int)((double)Model.ApprovedRequests / Model.TotalTimeOffRequests * 100) 
+                                : 0;
+                        }
+                        <div class="progress-bar bg-success" style="width: @approvedPercent%"></div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Pending</span>
+                        <span>@Model.PendingRequests</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        @{
+                            var pendingPercent = Model.TotalTimeOffRequests > 0 
+                                ? (int)((double)Model.PendingRequests / Model.TotalTimeOffRequests * 100) 
+                                : 0;
+                        }
+                        <div class="progress-bar bg-warning" style="width: @pendingPercent%"></div>
+                    </div>
+                </div>
+
+                <div class="mb-0">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Rejected</span>
+                        <span>@Model.RejectedRequests</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        @{
+                            var rejectedPercent = Model.TotalTimeOffRequests > 0 
+                                ? (int)((double)Model.RejectedRequests / Model.TotalTimeOffRequests * 100) 
+                                : 0;
+                        }
+                        <div class="progress-bar bg-danger" style="width: @rejectedPercent%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a asp-action="Employees" class="btn btn-outline-primary">
+                        <i class="bi bi-people me-2"></i>View All Employees
+                    </a>
+                    <a asp-action="Departments" class="btn btn-outline-primary">
+                        <i class="bi bi-diagram-3 me-2"></i>View Departments
+                    </a>
+                    <a asp-controller="Manager" asp-action="TimeOffRequests" class="btn btn-outline-primary">
+                        <i class="bi bi-calendar-check me-2"></i>Review Time Off Requests
+                    </a>
+                    <a asp-controller="Forum" asp-action="Index" class="btn btn-outline-primary">
+                        <i class="bi bi-chat-square-text me-2"></i>View Forum
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Report Information</h5>
+    </div>
+    <div class="card-body">
+        <p class="mb-0 text-muted">
+            This report provides a high-level overview of your organization's key metrics. 
+            For more detailed analytics, navigate to specific sections using the sidebar menu.
+            Reports are updated in real-time based on the latest data.
+        </p>
+    </div>
+</div>

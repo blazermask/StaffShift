@@ -1,0 +1,144 @@
+@model TimeOffRequestDto
+@{
+    ViewData["Title"] = "Time Off Request Details";
+}
+
+<div class="page-header">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-1">
+            <li class="breadcrumb-item"><a asp-action="Index">Time Off Requests</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Details</li>
+        </ol>
+    </nav>
+    <h1><i class="bi bi-calendar-event me-2"></i>Request Details</h1>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Request Information</h5>
+                @switch (Model.Status)
+                {
+                    case "Pending":
+                        <span class="badge badge-pending fs-6"><i class="bi bi-hourglass me-1"></i>Pending</span>
+                        break;
+                    case "Approved":
+                        <span class="badge badge-approved fs-6"><i class="bi bi-check me-1"></i>Approved</span>
+                        break;
+                    case "Rejected":
+                        <span class="badge badge-rejected fs-6"><i class="bi bi-x me-1"></i>Rejected</span>
+                        break;
+                    case "Cancelled":
+                        <span class="badge badge-cancelled fs-6"><i class="bi bi-slash-circle me-1"></i>Cancelled</span>
+                        break;
+                }
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Request Type</label>
+                        <p class="fs-5 mb-0">
+                            @switch (Model.RequestType)
+                            {
+                                case "Vacation":
+                                    <span class="badge bg-success fs-6"><i class="bi bi-sun me-1"></i>Vacation</span>
+                                    break;
+                                case "Sick":
+                                    <span class="badge bg-danger fs-6"><i class="bi bi-thermometer me-1"></i>Sick Leave</span>
+                                    break;
+                                case "Personal":
+                                    <span class="badge bg-info fs-6"><i class="bi bi-person me-1"></i>Personal Time</span>
+                                    break;
+                                default:
+                                    <span class="badge bg-secondary fs-6">@Model.RequestType</span>
+                                    break;
+                            }
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Total Days Requested</label>
+                        <p class="fs-5 mb-0"><strong>@Model.TotalDays day@(Model.TotalDays > 1 ? "s" : "")</strong></p>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Start Date</label>
+                        <p class="fs-5 mb-0"><strong>@Model.StartDate.ToString("dddd, MMMM dd, yyyy")</strong></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">End Date</label>
+                        <p class="fs-5 mb-0"><strong>@Model.EndDate.ToString("dddd, MMMM dd, yyyy")</strong></p>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Reason))
+                {
+                    <hr />
+                    <label class="form-label text-muted">Reason</label>
+                    <p class="mb-0">@Model.Reason</p>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.ManagerNotes))
+                {
+                    <hr />
+                    <label class="form-label text-muted">Manager Notes</label>
+                    <p class="mb-0 fst-italic">@Model.ManagerNotes</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-person me-2"></i>Request Timeline</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <strong>Request Submitted</strong>
+                        <br><small class="text-muted">@Model.CreatedAt.ToString("MMM dd, yyyy 'at' hh:mm tt")</small>
+                    </div>
+                    @if (Model.Status != "Pending" && Model.Status != "Cancelled")
+                    {
+                        <div class="timeline-item">
+                            <strong>@Model.Status</strong>
+                            @if (Model.ReviewedAt.HasValue)
+                            {
+                                <br><small class="text-muted">@Model.ReviewedAt.Value.ToString("MMM dd, yyyy 'at' hh:mm tt")</small>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.ReviewerName))
+                            {
+                                <br><small class="text-muted">by @Model.ReviewerName</small>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Actions</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Status == "Pending")
+                {
+                    <form asp-action="Cancel" method="post">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-outline-danger w-100 mb-2" onclick="return confirm('Are you sure you want to cancel this request?')">
+                            <i class="bi bi-x-circle me-2"></i>Cancel Request
+                        </button>
+                    </form>
+                }
+                <a asp-action="Index" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Requests
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

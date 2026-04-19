@@ -1,0 +1,213 @@
+@model MemberDetailViewModel
+@{
+    ViewData["Title"] = $"Employee: {Model.User.FirstName} {Model.User.LastName}";
+}
+
+<div class="page-header">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-1">
+            <li class="breadcrumb-item"><a asp-action="Team">My Team</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Employee Details</li>
+        </ol>
+    </nav>
+    <h1><i class="bi bi-person-badge me-2"></i>@Model.User.FirstName @Model.User.LastName</h1>
+</div>
+
+<div class="row">
+    <div class="col-lg-4">
+        <div class="profile-header mb-4">
+            <div class="profile-avatar">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            <div class="profile-name">@Model.User.FirstName @Model.User.LastName</div>
+            <div class="profile-role">
+                @if (Model.User.Roles != null && Model.User.Roles.Any())
+                {
+                    <span class="badge bg-light text-dark">@string.Join(", ", Model.User.Roles)</span>
+                }
+            </div>
+            <div class="mt-2">
+                <small><i class="bi bi-envelope me-1"></i>@Model.User.Email</small>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Employee Info</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Employee ID</dt>
+                    <dd class="col-sm-8">@(Model.User.EmployeeId ?? "Not assigned")</dd>
+                    
+                    <dt class="col-sm-4">Department</dt>
+                    <dd class="col-sm-8">@(Model.User.Department ?? "Not assigned")</dd>
+                    
+                    <dt class="col-sm-4">Position</dt>
+                    <dd class="col-sm-8">@(Model.User.Position ?? "Not assigned")</dd>
+                    
+                    @if (Model.User.ManagerId.HasValue)
+                    {
+                        <dt class="col-sm-4">Manager</dt>
+                        <dd class="col-sm-8">@Model.User.ManagerName</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        @if (Model.TimeOffSummary != null)
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-calendar-check me-2"></i>Time Off Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Vacation Days</span>
+                        <span>@Model.TimeOffSummary.VacationDaysUsed / @Model.TimeOffSummary.VacationDaysTotal</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 6px;">
+                        @{
+                            var vacationPercent = Model.TimeOffSummary.VacationDaysTotal > 0 
+                                ? (int)((double)Model.TimeOffSummary.VacationDaysUsed / Model.TimeOffSummary.VacationDaysTotal * 100) 
+                                : 0;
+                        }
+                        <div class="progress-bar bg-success" style="width: @vacationPercent%"></div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Sick Days</span>
+                        <span>@Model.TimeOffSummary.SickDaysUsed / @Model.TimeOffSummary.SickDaysTotal</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 6px;">
+                        @{
+                            var sickPercent = Model.TimeOffSummary.SickDaysTotal > 0 
+                                ? (int)((double)Model.TimeOffSummary.SickDaysUsed / Model.TimeOffSummary.SickDaysTotal * 100) 
+                                : 0;
+                        }
+                        <div class="progress-bar bg-warning" style="width: @sickPercent%"></div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Personal Days</span>
+                        <span>@Model.TimeOffSummary.PersonalDaysUsed / @Model.TimeOffSummary.PersonalDaysTotal</span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        @{
+                            var personalPercent = Model.TimeOffSummary.PersonalDaysTotal > 0 
+                                ? (int)((double)Model.TimeOffSummary.PersonalDaysUsed / Model.TimeOffSummary.PersonalDaysTotal * 100) 
+                                : 0;
+                        }
+                        <div class="progress-bar bg-info" style="width: @personalPercent%"></div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-calendar-week me-2"></i>Recent Shifts</h5>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.Shifts.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Start</th>
+                                    <th>End</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var shift in Model.Shifts.OrderByDescending(s => s.ShiftDate).Take(10))
+                                {
+                                    <tr>
+                                        <td>@shift.ShiftDate.ToString("MMM dd, yyyy")</td>
+                                        <td>@shift.StartTime.ToString(@"hh\:mm")</td>
+                                        <td>@shift.EndTime.ToString(@"hh\:mm")</td>
+                                        <td><span class="badge badge-@shift.Status.ToLower()">@shift.Status</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="bi bi-calendar-x"></i>
+                        <p>No shifts recorded</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-calendar-x me-2"></i>Time Off Requests</h5>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.TimeOffRequests.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Dates</th>
+                                    <th>Days</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var request in Model.TimeOffRequests.OrderByDescending(r => r.CreatedAt).Take(10))
+                                {
+                                    <tr>
+                                        <td><span class="badge bg-info">@request.RequestType</span></td>
+                                        <td>@request.StartDate.ToString("MMM dd") - @request.EndDate.ToString("MMM dd")</td>
+                                        <td>@request.TotalDays</td>
+                                        <td>
+                                            @switch (request.Status)
+                                            {
+                                                case "Pending":
+                                                    <span class="badge badge-pending">Pending</span>
+                                                    break;
+                                                case "Approved":
+                                                    <span class="badge badge-approved">Approved</span>
+                                                    break;
+                                                case "Rejected":
+                                                    <span class="badge badge-rejected">Rejected</span>
+                                                    break;
+                                                default:
+                                                    <span class="badge bg-secondary">@request.Status</span>
+                                                    break;
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="bi bi-calendar-check"></i>
+                        <p>No time off requests</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a asp-action="Team" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Back to Team
+    </a>
+</div>

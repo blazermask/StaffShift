@@ -1,0 +1,189 @@
+@model ForumPostDto
+@{
+    ViewData["Title"] = Model.Title;
+    var comments = ViewBag.Comments as IEnumerable<ForumCommentDto> ?? Enumerable.Empty<ForumCommentDto>();
+}
+
+<div class="page-header">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-1">
+            <li class="breadcrumb-item"><a asp-action="Index">Forum</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Post</li>
+        </ol>
+    </nav>
+    <h1>@Model.Title</h1>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    @if (Model.IsPinned)
+                    {
+                        <span class="badge bg-warning me-2"><i class="bi bi-pin-angle me-1"></i>Pinned</span>
+                    }
+                    @if (Model.IsLocked)
+                    {
+                        <span class="badge bg-secondary me-2"><i class="bi bi-lock me-1"></i>Locked</span>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Department))
+                    {
+                        <span class="badge bg-info me-2">@Model.Department</span>
+                    }
+                </div>
+                @if (ViewBag.CanEdit || ViewBag.CanManage)
+                {
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            @if (ViewBag.CanEdit)
+                            {
+                                <li><a class="dropdown-item" asp-action="Edit" asp-route-id="@Model.Id"><i class="bi bi-pencil me-2"></i>Edit Post</a></li>
+                            }
+                            @if (ViewBag.CanManage)
+                            {
+                                <li>
+                                    <form asp-action="Pin" asp-route-id="@Model.Id" method="post" class="d-inline">
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="bi bi-pin-angle me-2"></i>@(Model.IsPinned ? "Unpin" : "Pin") Post
+                                        </button>
+                                    </form>
+                                </li>
+                                <li>
+                                    <form asp-action="Lock" asp-route-id="@Model.Id" method="post" class="d-inline">
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="bi bi-lock me-2"></i>@(Model.IsLocked ? "Unlock" : "Lock") Post
+                                        </button>
+                                    </form>
+                                </li>
+                            }
+                            @if (ViewBag.CanEdit)
+                            {
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline">
+                                        <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Are you sure you want to delete this post?')">
+                                            <i class="bi bi-trash me-2"></i>Delete Post
+                                        </button>
+                                    </form>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="me-3">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                            <i class="bi bi-person-fill fs-4"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <strong>@Model.AuthorName</strong>
+                        <br><small class="text-muted">@Model.CreatedAt.ToString("MMMM dd, yyyy 'at' hh:mm tt")</small>
+                    </div>
+                </div>
+                <hr />
+                <div class="post-content">
+                    @Html.Raw(Model.Content.Replace("\n", "<br/>"))
+                </div>
+            </div>
+        </div>
+
+        <!-- Comments Section -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-chat-dots me-2"></i>Comments (@comments.Count())</h5>
+            </div>
+            <div class="card-body">
+                @if (!Model.IsLocked)
+                {
+                    <form asp-action="Comment" method="post" class="mb-4">
+                        <input type="hidden" name="PostId" value="@Model.Id" />
+                        <div class="mb-2">
+                            <textarea name="Content" class="form-control" rows="3" placeholder="Write a comment..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-send me-1"></i>Post Comment
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <div class="alert alert-secondary mb-4">
+                        <i class="bi bi-lock me-2"></i>This post is locked. No new comments can be added.
+                    </div>
+                }
+
+                @if (comments.Any())
+                {
+                    @foreach (var comment in comments.OrderByDescending(c => c.CreatedAt))
+                    {
+                        <div class="forum-comment mb-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <strong class="me-2">@comment.AuthorName</strong>
+                                        <small class="text-muted">@comment.CreatedAt.ToString("MMM dd, hh:mm tt")</small>
+                                    </div>
+                                    <p class="mb-0">@comment.Content</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-chat-dots fs-1"></i>
+                        <p class="mt-2">No comments yet. Be the first to comment!</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Post Info</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Author</dt>
+                    <dd class="col-sm-8">@Model.AuthorName</dd>
+                    
+                    <dt class="col-sm-4">Posted</dt>
+                    <dd class="col-sm-8">@Model.CreatedAt.ToString("MMM dd, yyyy")</dd>
+                    
+                    @if (Model.UpdatedAt.HasValue)
+                    {
+                        <dt class="col-sm-4">Updated</dt>
+                        <dd class="col-sm-8">@Model.UpdatedAt.Value.ToString("MMM dd, yyyy")</dd>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(Model.Department))
+                    {
+                        <dt class="col-sm-4">Department</dt>
+                        <dd class="col-sm-8">@Model.Department</dd>
+                    }
+                    
+                    <dt class="col-sm-4">Comments</dt>
+                    <dd class="col-sm-8">@Model.CommentCount</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <a asp-action="Index" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Forum
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

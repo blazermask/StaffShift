@@ -1,0 +1,95 @@
+@model UpdateProfileDto
+@{
+    ViewData["Title"] = "Edit Employee";
+    var userId = ViewBag.UserId;
+    var userRoles = ViewBag.UserRoles as List<string> ?? new List<string>();
+    var currentManagerId = ViewBag.CurrentManagerId as int?;
+    var managers = ViewBag.Managers as IEnumerable<UserDto> ?? Enumerable.Empty<UserDto>();
+}
+
+<div class="page-header">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-1">
+            <li class="breadcrumb-item"><a asp-action="Employees">Employees</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Edit</li>
+        </ol>
+    </nav>
+    <h1><i class="bi bi-pencil me-2"></i>Edit Employee</h1>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="EditEmployee" method="post">
+                    <input type="hidden" name="id" value="@userId" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">First Name</label>
+                            <input type="text" name="FirstName" value="@Model.FirstName" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" name="LastName" value="@Model.LastName" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Department</label>
+                            <input type="text" name="Department" value="@Model.Department" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Position</label>
+                            <input type="text" name="Position" value="@Model.Position" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Role</label>
+                            <select name="role" class="form-select">
+                                <option value="Worker" selected="@(userRoles.Contains("Worker") && !userRoles.Contains("Manager"))">Worker</option>
+                                <option value="Manager" selected="@(userRoles.Contains("Manager"))">Manager</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Assign Manager</label>
+                            <select name="managerId" class="form-select">
+                                <option value="">No Manager</option>
+                                @foreach (var manager in managers)
+                                {
+                                    <option value="@manager.Id" selected="@(currentManagerId == manager.Id)">@manager.FirstName @manager.LastName (@string.Join(", ", manager.Roles))</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-2"></i>Save Changes
+                        </button>
+                        <a asp-action="Employees" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-info-circle me-2"></i>Edit Guidelines</h5>
+                <ul class="mb-0">
+                    <li>Changing a Manager to Worker will remove their team assignments.</li>
+                    <li>Workers must have a manager assigned.</li>
+                    <li>Department changes will affect forum visibility.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

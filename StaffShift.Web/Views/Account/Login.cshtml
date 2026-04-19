@@ -1,0 +1,148 @@
+@model LoginDto
+@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - StaffShift</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-wrapper {
+            width: 100%;
+            max-width: 440px;
+            padding: 1rem;
+        }
+        .login-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            padding: 2.5rem;
+        }
+        .login-logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .login-logo i {
+            font-size: 3.5rem;
+            color: #1a365d;
+        }
+        .login-logo h2 {
+            margin-top: 0.5rem;
+            color: #1a365d;
+            font-weight: 700;
+        }
+        .login-logo p {
+            color: #718096;
+            font-size: 0.875rem;
+        }
+        .demo-accounts {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+        }
+        .demo-accounts h6 { color: #4a5568; font-weight: 600; margin-bottom: 0.5rem; }
+        .demo-badge { cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-card">
+            <div class="login-logo">
+                <i class="bi bi-clock-history"></i>
+                <h2>StaffShift</h2>
+                <p>Shift & Staff Management System</p>
+            </div>
+
+            <form asp-action="Login" method="post">
+                <input type="hidden" asp-for="UsernameOrEmail" id="hiddenUsernameOrEmail" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" style="display:@(ViewContext.ModelState.ErrorCount > 0 ? "block" : "none")"></div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Username or Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input id="usernameOrEmailInput" name="UsernameOrEmail" class="form-control"
+                               placeholder="Enter username or email" autocomplete="username"
+                               value="@Model?.UsernameOrEmail" required />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label fw-semibold">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input asp-for="Password" type="password" class="form-control"
+                               placeholder="Enter your password" autocomplete="current-password" required />
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                            <i class="bi bi-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label">Remember me</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                </button>
+
+                <div class="text-center">
+                    <p class="mb-0 text-muted small">
+                        Don't have an account? <a asp-action="Register" class="text-decoration-none fw-semibold">Register here</a>
+                    </p>
+                </div>
+            </form>
+
+            <div class="demo-accounts mt-3">
+                <h6><i class="bi bi-info-circle me-1"></i>Demo Accounts</h6>
+                <div class="d-flex flex-wrap gap-1">
+                    <span class="badge bg-danger demo-badge" onclick="fillLogin('ceo','CEO123!')">CEO: ceo / CEO123!</span>
+                    <span class="badge bg-warning text-dark demo-badge" onclick="fillLogin('manager','Manager123!')">Manager: manager / Manager123!</span>
+                    <span class="badge bg-success demo-badge" onclick="fillLogin('worker','Worker123!')">Worker: worker / Worker123!</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        function fillLogin(username, password) {
+            document.getElementById('usernameOrEmailInput').value = username;
+            document.querySelector('input[name="Password"]').value = password;
+        }
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            var input = document.querySelector('input[name="Password"]');
+            var icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        });
+    </script>
+</body>
+</html>

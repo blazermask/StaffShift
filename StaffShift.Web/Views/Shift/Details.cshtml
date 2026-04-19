@@ -1,0 +1,193 @@
+@model ShiftDto
+@{
+    ViewData["Title"] = "Shift Details";
+}
+
+<div class="page-header">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-1">
+            <li class="breadcrumb-item"><a asp-action="Index">My Shifts</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Shift Details</li>
+        </ol>
+    </nav>
+    <h1><i class="bi bi-calendar-event me-2"></i>Shift Details</h1>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Shift Information</h5>
+                @switch (Model.Status)
+                {
+                    case "Scheduled":
+                        <span class="badge badge-scheduled fs-6"><i class="bi bi-clock me-1"></i>Scheduled</span>
+                        break;
+                    case "Completed":
+                        <span class="badge badge-completed fs-6"><i class="bi bi-check me-1"></i>Completed</span>
+                        break;
+                    case "Missed":
+                        <span class="badge badge-missed fs-6"><i class="bi bi-x me-1"></i>Missed</span>
+                        break;
+                    case "Cancelled":
+                        <span class="badge badge-cancelled fs-6"><i class="bi bi-slash-circle me-1"></i>Cancelled</span>
+                        break;
+                }
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Date</label>
+                        <p class="fs-5 mb-0">
+                            <strong>@Model.ShiftDate.ToString("dddd, MMMM dd, yyyy")</strong>
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Duration</label>
+                        <p class="fs-5 mb-0">
+                            @{
+                                var duration = Model.EndTime - Model.StartTime;
+                            }
+                            <strong>@duration.TotalHours.ToString("F1") hours</strong>
+                        </p>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted">Scheduled Start</label>
+                        <p class="fs-5 mb-0"><strong>@Model.StartTime.ToString(@"hh\:mm")</strong></p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted">Scheduled End</label>
+                        <p class="fs-5 mb-0"><strong>@Model.EndTime.ToString(@"hh\:mm")</strong></p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted">Break Time</label>
+                        <p class="fs-5 mb-0"><strong>30 minutes</strong></p>
+                    </div>
+                </div>
+
+                @if (Model.ActualStartTime.HasValue || Model.ActualEndTime.HasValue)
+                {
+                    <hr />
+                    <h6 class="text-muted mb-3"><i class="bi bi-check-circle me-2"></i>Actual Times</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Clocked In</label>
+                            <p class="fs-5 mb-0">
+                                @if (Model.ActualStartTime.HasValue)
+                                {
+                                    <strong>@Model.ActualStartTime.Value.ToString(@"hh\:mm")</strong>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Not clocked in</span>
+                                }
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Clocked Out</label>
+                            <p class="fs-5 mb-0">
+                                @if (Model.ActualEndTime.HasValue)
+                                {
+                                    <strong>@Model.ActualEndTime.Value.ToString(@"hh\:mm")</strong>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Not clocked out</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.Notes))
+                {
+                    <hr />
+                    <label class="form-label text-muted">Notes</label>
+                    <p class="mb-0">@Model.Notes</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Actions</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Status == "Scheduled")
+                {
+                    @if (!Model.ActualStartTime.HasValue && Model.ShiftDate.Date <= DateTime.Today)
+                    {
+                        <form asp-action="ClockIn" method="post" class="mb-2">
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="bi bi-play-circle me-2"></i>Clock In
+                            </button>
+                        </form>
+                    }
+                    else if (Model.ActualStartTime.HasValue && !Model.ActualEndTime.HasValue)
+                    {
+                        <form asp-action="ClockOut" method="post" class="mb-2">
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-warning w-100">
+                                <i class="bi bi-stop-circle me-2"></i>Clock Out
+                            </button>
+                        </form>
+                    }
+                    
+                    <form asp-action="Cancel" method="post" class="mb-2">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-outline-danger w-100" onclick="return confirm('Are you sure you want to cancel this shift?')">
+                            <i class="bi bi-x-circle me-2"></i>Cancel Shift
+                        </button>
+                    </form>
+                }
+                
+                <a asp-action="Index" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Shifts
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Shift Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <strong>Scheduled</strong>
+                        <br><small class="text-muted">Shift has been created</small>
+                    </div>
+                    @if (Model.ActualStartTime.HasValue)
+                    {
+                        <div class="timeline-item">
+                            <strong>Clocked In</strong>
+                            <br><small class="text-muted">@Model.ActualStartTime.Value.ToString(@"hh\:mm")</small>
+                        </div>
+                    }
+                    @if (Model.ActualEndTime.HasValue)
+                    {
+                        <div class="timeline-item">
+                            <strong>Clocked Out</strong>
+                            <br><small class="text-muted">@Model.ActualEndTime.Value.ToString(@"hh\:mm")</small>
+                        </div>
+                    }
+                    @if (Model.Status == "Completed")
+                    {
+                        <div class="timeline-item">
+                            <strong>Completed</strong>
+                            <br><small class="text-muted">Shift finished successfully</small>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

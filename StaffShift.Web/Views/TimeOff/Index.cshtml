@@ -1,0 +1,183 @@
+@model IEnumerable<TimeOffRequestDto>
+@{
+    ViewData["Title"] = "Time Off Requests";
+}
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1><i class="bi bi-calendar-x me-2"></i>Time Off Requests</h1>
+        <p class="text-muted mb-0">Manage your vacation, sick days, and personal time</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Request Time Off
+    </a>
+</div>
+
+@if (ViewBag.TimeOffSummary != null)
+{
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-success mb-1">@ViewBag.TimeOffSummary.VacationDaysRemaining</h3>
+                    <p class="text-muted mb-0">Vacation Days Remaining</p>
+                    <small class="text-muted">of @ViewBag.TimeOffSummary.VacationDaysTotal total</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-warning mb-1">@ViewBag.TimeOffSummary.SickDaysRemaining</h3>
+                    <p class="text-muted mb-0">Sick Days Remaining</p>
+                    <small class="text-muted">of @ViewBag.TimeOffSummary.SickDaysTotal total</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-info mb-1">@ViewBag.TimeOffSummary.PersonalDaysRemaining</h3>
+                    <p class="text-muted mb-0">Personal Days Remaining</p>
+                    <small class="text-muted">of @ViewBag.TimeOffSummary.PersonalDaysTotal total</small>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (ViewBag.PendingRequests != null && ((IEnumerable<dynamic>)ViewBag.PendingRequests).Any())
+{
+    <div class="card mb-4 border-warning">
+        <div class="card-header bg-warning text-white">
+            <h5 class="mb-0"><i class="bi bi-hourglass-split me-2"></i>Pending Approvals (@((ViewBag.PendingRequests as IEnumerable<dynamic>)?.Count() ?? 0))</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Type</th>
+                            <th>Dates</th>
+                            <th>Days</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var request in ViewBag.PendingRequests)
+                        {
+                            <tr>
+                                <td>@request.UserName</td>
+                                <td><span class="badge bg-info">@request.RequestType</span></td>
+                                <td>@request.StartDate.ToString("MMM dd") - @request.EndDate.ToString("MMM dd")</td>
+                                <td>@request.TotalDays</td>
+                                <td>
+                                    <a asp-action="Review" asp-route-id="@request.Id" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-check-lg me-1"></i>Review
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-list me-2"></i>My Requests</h5>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Days</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var request in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @switch (request.RequestType)
+                                    {
+                                        case "Vacation":
+                                            <span class="badge bg-success"><i class="bi bi-sun me-1"></i>Vacation</span>
+                                            break;
+                                        case "Sick":
+                                            <span class="badge bg-danger"><i class="bi bi-thermometer me-1"></i>Sick</span>
+                                            break;
+                                        case "Personal":
+                                            <span class="badge bg-info"><i class="bi bi-person me-1"></i>Personal</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">@request.RequestType</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>@request.StartDate.ToString("MMM dd, yyyy")</td>
+                                <td>@request.EndDate.ToString("MMM dd, yyyy")</td>
+                                <td>@request.TotalDays</td>
+                                <td>
+                                    @switch (request.Status)
+                                    {
+                                        case "Pending":
+                                            <span class="badge badge-pending"><i class="bi bi-hourglass me-1"></i>Pending</span>
+                                            break;
+                                        case "Approved":
+                                            <span class="badge badge-approved"><i class="bi bi-check me-1"></i>Approved</span>
+                                            break;
+                                        case "Rejected":
+                                            <span class="badge badge-rejected"><i class="bi bi-x me-1"></i>Rejected</span>
+                                            break;
+                                        case "Cancelled":
+                                            <span class="badge badge-cancelled"><i class="bi bi-slash-circle me-1"></i>Cancelled</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Details" asp-route-id="@request.Id" class="btn btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        @if (request.Status == "Pending")
+                                        {
+                                            <form asp-action="Cancel" method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="@request.Id" />
+                                                <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Cancel this request?')">
+                                                    <i class="bi bi-x"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="bi bi-calendar-x"></i>
+                <h5>No Time Off Requests</h5>
+                <p>You haven't submitted any time off requests yet.</p>
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>Request Time Off
+                </a>
+            </div>
+        }
+    </div>
+</div>
