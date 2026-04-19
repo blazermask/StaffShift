@@ -85,18 +85,22 @@ public class CEOController : Controller
     }
 
     // GET: CEO/CreateEmployee
-    public IActionResult CreateEmployee()
+    public async Task<IActionResult> CreateEmployee()
     {
+        var users = await _userService.GetAllUsersAsync();
+        ViewBag.Managers = users.Where(u => u.Roles.Contains("Manager") || u.Roles.Contains("CEO"));
         return View();
     }
 
     // POST: CEO/CreateEmployee
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateEmployee(RegisterDto model)
+    public async Task<IActionResult> CreateEmployee(RegisterDto model, string role = "Worker")
     {
         if (!ModelState.IsValid)
         {
+            var users = await _userService.GetAllUsersAsync();
+            ViewBag.Managers = users.Where(u => u.Roles.Contains("Manager") || u.Roles.Contains("CEO"));
             return View(model);
         }
 
@@ -105,11 +109,31 @@ public class CEOController : Controller
 
         if (result.Success)
         {
-            TempData["Success"] = $"Employee {model.Email} created successfully.";
+            // Assign role if specified (default is Worker)
+            if (!string.IsNullOrEmpty(role) && role != "Worker" && result.User != null)
+            {
+                var user = await _userManager.FindByIdAsync(result.User.Id.ToString());
+                if (user != null)
+                {
+                    var currentRoles = await _userManager.GetRolesAsync(user);
+                    await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                    await _userManager.AddToRoleAsync(user, role);
+                }
+            }
+            
+            // Assign manager if specified
+            if (model.ManagerId.HasValue && result.User != null)
+            {
+                await _userService.AssignManagerAsync(result.User.Id, model.ManagerId.Value);
+            }
+            
+            TempData["Success"] = $"Employee {model.Username} created successfully.";
             return RedirectToAction(nameof(Employees));
         }
 
         ModelState.AddModelError("", result.Message);
+        var allUsers = await _userService.GetAllUsersAsync();
+        ViewBag.Managers = allUsers.Where(u => u.Roles.Contains("Manager") || u.Roles.Contains("CEO"));
         return View(model);
     }
 
